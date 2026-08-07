@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Brand colors — "The Institution" */
+  --color-canvas: #FAF8F3;
+  --color-surface: #F2EDE4;
+  --color-surface-deep: #E8E0D2;
+  --color-ink: #1A1816;
+  --color-body: #3D3A35;
+  --color-muted: #8A847B;
+  --color-hairline: #D9D2C6;
+  --color-accent: #1B4332;
+  --color-accent-hover: #2D6A4F;
+  --color-gold: #B8860B;
+  --color-dark-surface: #1F1E1B;
+
+  /* shadcn semantic mappings */
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-canvas);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-surface-deep);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-surface-deep);
+  --color-muted-foreground: var(--color-muted);
+  --color-accent-foreground: var(--color-accent);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-border: var(--color-hairline);
+  --color-input: var(--color-hairline);
+  --color-ring: var(--color-accent);
+  --color-chart-1: var(--color-accent);
+  --color-chart-2: var(--color-gold);
+  --color-chart-3: var(--color-muted);
+  --color-chart-4: var(--color-surface-deep);
+  --color-chart-5: var(--color-ink);
+  --radius: 0.5rem;
+  --color-sidebar: var(--color-surface);
+  --color-sidebar-foreground: var(--color-ink);
+  --color-sidebar-primary: var(--color-accent);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: var(--color-surface-deep);
+  --color-sidebar-accent-foreground: var(--color-accent);
+  --color-sidebar-border: var(--color-hairline);
+  --color-sidebar-ring: var(--color-accent);
+
+  /* Fonts */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  --font-heading: var(--font-fraunces), Georgia, serif;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+}
