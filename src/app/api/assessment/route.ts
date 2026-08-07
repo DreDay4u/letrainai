@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * AI Assessment API — POST /api/assessment
@@ -466,6 +468,27 @@ export async function POST(request: Request) {
 
   const result = await generateResult(answers);
   cacheResult(sessionId, result);
+
+  // Best-effort persistence: save the result to Supabase. A DB failure
+  // must never break the user's response.
+  try {
+    const { error } = await supabase.from("assessment_results").insert({
+      session_id: sessionId,
+      industry: answers.industry,
+      company_size: answers.company_size,
+      responses: answers,
+      recommendation: result,
+      status: "completed",
+    });
+    if (error) {
+      console.error("[assessment] Failed to persist result to Supabase:", error);
+    }
+  } catch (err) {
+    console.error("[assessment] Supabase persistence error:", err);
+  }
+
+  // Best-effort analytics event.
+  await trackEvent("assessment_complete", sessionId, null, null);
 
   return Response.json(result);
 }

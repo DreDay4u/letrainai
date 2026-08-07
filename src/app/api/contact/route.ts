@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * POST /api/contact
@@ -110,8 +112,34 @@ export async function POST(request: NextRequest) {
 
     const lead = parsed.data;
 
-    // Phase 3b: Wire Supabase persistence here — insert `lead` into the leads table.
-    console.log("[contact] New lead:", JSON.stringify(lead, null, 2));
+    // Phase 3b: Persist the lead to Supabase (best-effort — a DB failure
+    // must never lose the user's submission).
+    try {
+      const { data: inserted, error } = await supabase
+        .from("contact_leads")
+        .insert({
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone ?? null,
+          industry: lead.industry ?? null,
+          company_size: lead.company_size ?? null,
+          service_interest: lead.service_interest ?? null,
+          message: lead.message ?? null,
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        console.error("[contact] Failed to persist lead to Supabase:", error);
+      } else {
+        console.log("[contact] Lead persisted, id:", inserted.id);
+      }
+    } catch (err) {
+      console.error("[contact] Supabase persistence error:", err);
+    }
+
+    // Best-effort analytics event.
+    await trackEvent("contact_submit", null, null, null);
 
     return Response.json({
       success: true,
