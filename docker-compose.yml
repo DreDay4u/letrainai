@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3102:3102"
+    restart: unless-stopped
+    init: true
+    env_file:
+      - .env.local
+    networks:
+      - coolify
+      - supabase_default
+
+networks:
+  coolify:
+    external: true
+  supabase_default:
+    external: true

@@ -9,9 +9,10 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
   { href: "/about", label: "About" },
+  { href: "/case-studies", label: "Case Studies" },
   { href: "/assessment", label: "Assessment" },
-  { href: "/faq", label: "FAQ" },
   { href: "/blog", label: "Blog" },
+  { href: "/faq", label: "FAQ" },
 ];
 
 export function Nav() {
