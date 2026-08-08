@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Section } from "@/components/layout/section";
 import { getAllCaseStudies, getCaseStudy } from "@/lib/content";
-import { DocumentRenderer } from "@keystatic/core/renderer";
+import { marked } from "marked";
 
 export async function generateStaticParams() {
   const studies = await getAllCaseStudies();
@@ -19,7 +19,7 @@ export async function generateMetadata({
   const study = await getCaseStudy(slug);
   if (!study) return {};
   return {
-    title: `${study.title} — LeTrainAI`,
+    title: study.title,
     description: study.challenge,
   };
 }
@@ -32,6 +32,8 @@ export default async function CaseStudyPage({
   const { slug } = await params;
   const study = await getCaseStudy(slug);
   if (!study) notFound();
+
+  const html = marked.parse(study.content, { async: false }) as string;
 
   return (
     <main>
@@ -79,9 +81,11 @@ export default async function CaseStudyPage({
             </div>
           </div>
 
-          <div className="mt-10 max-w-none">
-            <DocumentRenderer document={study.content as any} />
-          </div>
+          <div
+            className="mt-10 max-w-none [&_h2]:mt-8 [&_h2]:font-serif [&_h2]:text-xl [&_h2]:text-ink [&_h3]:mt-6 [&_h3]:font-serif [&_h3]:text-lg [&_h3]:text-ink [&_p]:mt-4 [&_p]:leading-relaxed [&_p]:text-body [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6 [&_blockquote]:border-l-2 [&_blockquote]:border-muted [&_blockquote]:pl-4 [&_blockquote]:italic"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+
         </article>
 
         <div className="mt-16 border-t border-hairline pt-8">

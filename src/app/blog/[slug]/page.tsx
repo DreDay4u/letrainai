@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Section } from "@/components/layout/section";
 import { getAllPosts, getPost } from "@/lib/content";
-import { DocumentRenderer } from "@keystatic/core/renderer";
+import { marked } from "marked";
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -19,7 +19,7 @@ export async function generateMetadata({
   const post = await getPost(slug);
   if (!post) return {};
   return {
-    title: `${post.title} — LeTrainAI`,
+    title: post.title,
     description: post.description,
   };
 }
@@ -32,6 +32,8 @@ export default async function BlogPostPage({
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) notFound();
+
+  const html = marked.parse(post.content, { async: false }) as string;
 
   return (
     <main>
@@ -59,9 +61,11 @@ export default async function BlogPostPage({
           </h1>
           <p className="mt-4 text-lg text-body">{post.description}</p>
 
-          <div className="mt-10 max-w-none">
-            <DocumentRenderer document={post.content as any} />
-          </div>
+          <div
+            className="mt-10 max-w-none [&_h2]:mt-8 [&_h2]:font-serif [&_h2]:text-xl [&_h2]:text-ink [&_h3]:mt-6 [&_h3]:font-serif [&_h3]:text-lg [&_h3]:text-ink [&_p]:mt-4 [&_p]:leading-relaxed [&_p]:text-body [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mt-1 [&_blockquote]:border-l-2 [&_blockquote]:border-accent [&_blockquote]:pl-4 [&_blockquote]:italic [&_a]:text-accent [&_a]:underline"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+
         </article>
 
         <div className="mt-16 border-t border-hairline pt-8">

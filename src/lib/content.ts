@@ -1,15 +1,59 @@
-import { createReader } from "@keystatic/core/reader";
-import keystaticConfig from "../../keystatic.config";
+import fs from "fs";
 import path from "path";
 
-const reader = createReader(path.join(process.cwd()), keystaticConfig);
+/**
+ * Direct content reader for MDX files with YAML frontmatter.
+ * Reads blog posts and case studies from src/content/ without depending on
+ * the Keystatic document format parser.
+ */
+
+const CONTENT_DIR = path.join(process.cwd(), "src", "content");
+
+function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
+  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!match) return { data: {}, body: raw };
+
+  const yaml = match[1];
+  const body = match[2];
+  const data: Record<string, string> = {};
+
+  // Simple YAML key-value parser (handles quoted values, escaped quotes)
+  const lines = yaml.split("\n");
+  for (const line of lines) {
+    const m = line.match(/^(\w+):\s*(.*)$/);
+    if (!m) continue;
+    let val = m[2].trim();
+    // Remove surrounding quotes (single or double), handling '' as escaped '
+    if (val.startsWith("'") && val.endsWith("'")) {
+      val = val.slice(1, -1).replace(/''/g, "'");
+    } else if (val.startsWith('"') && val.endsWith('"')) {
+      val = val.slice(1, -1).replace(/\\"/g, '"');
+    }
+    data[m[1]] = val;
+  }
+
+  return { data, body };
+}
+
+function readContentFiles(dir: string): { slug: string; data: Record<string, string>; body: string }[] {
+  const dirPath = path.join(CONTENT_DIR, dir);
+  if (!fs.existsSync(dirPath)) return [];
+
+  const files = fs.readdirSync(dirPath).filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
+  return files.map((file) => {
+    const slug = file.replace(/\.mdx?$/, "");
+    const raw = fs.readFileSync(path.join(dirPath, file), "utf-8");
+    const { data, body } = parseFrontmatter(raw);
+    return { slug, data, body };
+  });
+}
 
 export type Post = {
   slug: string;
   title: string;
   description: string;
   publishedAt: string;
-  content: unknown;
+  content: string;
 };
 
 export type CaseStudy = {
@@ -20,63 +64,41 @@ export type CaseStudy = {
   challenge: string;
   result: string;
   isIllustrative: boolean;
-  content: any;
+  content: string;
 };
 
 export async function getAllPosts(): Promise<Post[]> {
-  const posts = await reader.collections.posts.all();
-  return posts
-    .map((p) => ({
-      slug: p.slug,
-      title: p.entry.title,
-      description: p.entry.description,
-      publishedAt: p.entry.publishedAt ?? "",
-      content: p.entry.content,
+  return readContentFiles("posts")
+    .map((f) => ({
+      slug: f.slug,
+      title: f.data.title ?? f.slug,
+      description: f.data.description ?? "",
+      publishedAt: f.data.publishedAt ?? "",
+      content: f.body,
     }))
     .filter((p) => p.publishedAt !== "")
-    .sort(
-      (a, b) =>
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 }
 
 export async function getPost(slug: string): Promise<Post | null> {
-  const post = await reader.collections.posts.read(slug);
-  if (!post) return null;
-  return {
-    slug,
-    title: post.title,
-    description: post.description,
-    publishedAt: post.publishedAt ?? "",
-    content: post.content,
-  };
+  const posts = await getAllPosts();
+  return posts.find((p) => p.slug === slug) ?? null;
 }
 
 export async function getAllCaseStudies(): Promise<CaseStudy[]> {
-  const studies = await reader.collections.caseStudies.all();
-  return studies.map((s) => ({
-    slug: s.slug,
-    title: s.entry.title,
-    industry: s.entry.industry,
-    companySize: s.entry.companySize,
-    challenge: s.entry.challenge,
-    result: s.entry.result,
-    isIllustrative: s.entry.isIllustrative ?? true,
-    content: s.entry.content,
+  return readContentFiles("case-studies").map((f) => ({
+    slug: f.slug,
+    title: f.data.title ?? f.slug,
+    industry: f.data.industry ?? "",
+    companySize: f.data.companySize ?? "",
+    challenge: f.data.challenge ?? "",
+    result: f.data.result ?? "",
+    isIllustrative: f.data.isIllustrative !== "false",
+    content: f.body,
   }));
 }
 
 export async function getCaseStudy(slug: string): Promise<CaseStudy | null> {
-  const study = await reader.collections.caseStudies.read(slug);
-  if (!study) return null;
-  return {
-    slug,
-    title: study.title,
-    industry: study.industry,
-    companySize: study.companySize,
-    challenge: study.challenge,
-    result: study.result,
-    isIllustrative: study.isIllustrative ?? true,
-    content: study.content,
-  };
+  const studies = await getAllCaseStudies();
+  return studies.find((s) => s.slug === slug) ?? null;
 }
