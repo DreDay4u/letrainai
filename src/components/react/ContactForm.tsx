@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { actions } from "astro:actions";
+import { track } from "@/lib/analytics/client";
 
 const SERVICES = [
   "AI Automation",
@@ -47,6 +49,8 @@ export default function ContactForm() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const update = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -91,16 +95,25 @@ export default function ContactForm() {
     e.preventDefault();
     if (!validateStep(3)) return;
 
+    setSubmitting(true);
+    setServerError("");
+    track("contact_start");
     try {
-      await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const { error } = await actions.contact(
+        form as unknown as Record<string, unknown>
+      );
+      if (error) {
+        // Structured action error (validation / rate limit / server) —
+        // show the message, keep the user on the form. Never a stack trace.
+        setServerError(error.message || "Something went wrong. Please try again later.");
+        return;
+      }
+      setSubmitted(true);
     } catch {
-      // API route arrives in Phase 3 — swallow for now
+      setServerError("Something went wrong. Please try again later.");
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitted(true);
   };
 
   return (
@@ -200,6 +213,14 @@ export default function ContactForm() {
                 className="border border-hairline rounded-lg bg-surface p-6 sm:p-10"
                 noValidate
               >
+                {serverError && (
+                  <p
+                    className="mb-6 text-sm text-accent border border-hairline rounded-lg px-4 py-3"
+                    role="alert"
+                  >
+                    {serverError}
+                  </p>
+                )}
                 {/* Progress indicator */}
                 <div className="flex items-center justify-between mb-8">
                   <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
@@ -271,9 +292,10 @@ export default function ContactForm() {
                     <div className="flex flex-col items-end gap-2">
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+                        disabled={submitting}
+                        className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
                       >
-                        Send my message →
+                        {submitting ? "Sending…" : "Send my message →"}
                       </button>
                       <p className="font-mono text-xs text-muted">
                         We never share your data.

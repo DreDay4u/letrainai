@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node tests/assessment.test.mjs",
+    "test": "node tests/assessment.test.mjs && node tests/contact-events.test.mjs",
     "start": "node ./dist/server/entry.mjs"
   },
   "dependencies": {

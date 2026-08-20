@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { track } from "@/lib/analytics/client";
 
 /* ------------------------------------------------------------------ */
 /* Question data                                                       */
@@ -129,7 +130,9 @@ export default function AssessmentWizard() {
   );
 
   useEffect(() => {
-    setSessionId(crypto.randomUUID());
+    const id = crypto.randomUUID();
+    setSessionId(id);
+    track("assessment_start", { sessionId: id });
   }, []);
 
   const canContinue = useMemo(() => {
@@ -166,6 +169,7 @@ export default function AssessmentWizard() {
   const handleSubmit = async () => {
     setStatus("submitting");
     setApiError("");
+    track("assessment_submit", { sessionId });
     try {
       const res = await fetch("/api/assessment", {
         method: "POST",
@@ -182,21 +186,25 @@ export default function AssessmentWizard() {
           "You've reached the assessment limit. Try again in an hour."
         );
         setStatus("error");
+        track("assessment_failed", { sessionId });
         return;
       }
 
       if (!res.ok) {
         setApiError("Something went wrong generating your report. Please try again.");
         setStatus("error");
+        track("assessment_failed", { sessionId });
         return;
       }
 
       const data: AssessmentResult = await res.json();
       setResult(data);
       setStatus("results");
+      track("assessment_generated", { sessionId });
     } catch {
       setApiError("Something went wrong generating your report. Please try again.");
       setStatus("error");
+      track("assessment_failed", { sessionId });
     }
   };
 
@@ -209,6 +217,7 @@ export default function AssessmentWizard() {
     }
     setEmailError("");
     setEmailStatus("submitting");
+    track("email_capture_submit", { sessionId });
     try {
       await fetch("/api/assessment/email", {
         method: "POST",
