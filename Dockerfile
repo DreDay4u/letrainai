@@ -4,7 +4,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+# Deployment gate: a source build cannot replace production until both
+# behavioral suites pass. Coolify only proceeds to health-checked runtime
+# after this stage completes.
+RUN npm run test && npm run build
 
 # --- runtime stage ---
 FROM node:22-alpine AS runner
