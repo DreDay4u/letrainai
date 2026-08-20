@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Placeholder design tokens — Phase 2 will port the real palette. */
+:root {
+  --color-bg: #0a0a0a;
+  --color-fg: #fafafa;
+  --color-accent: #3b82f6;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
