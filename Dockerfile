@@ -19,7 +19,10 @@ ENV NODE_ENV=production \
 # entry.mjs imports astro + prod deps at runtime, so a full production
 # install is required. package.json kept for ESM resolution.
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# Coolify's HTTP health gate executes curl inside this runtime image.
+RUN apk add --no-cache curl \
+    && npm ci --omit=dev \
+    && npm cache clean --force
 COPY --from=builder --chown=node:node /app/dist ./dist
 # Keystatic local-mode storage: content collections live on disk (read + admin writes)
 COPY --from=builder --chown=node:node /app/src/content ./src/content
