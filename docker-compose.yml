@@ -14,7 +14,7 @@ services:
         R2_S3_ENDPOINT: ${R2_S3_ENDPOINT}
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
     ports:
-      - "3102:3102"
+      - "127.0.0.1:3102:3102"
     restart: unless-stopped
     init: true
     env_file:
