@@ -60,5 +60,22 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href;
       <slot />
     </main>
     <Footer />
+    <script>
+      // Public analytics (Phase 6): landing_view on every page load +
+      // delegated cta_click for any [data-cta] element. Fire-and-forget.
+      import { track, utmFromLocation } from '@/lib/analytics/client';
+
+      track('landing_view', { page: window.location.pathname, utm: utmFromLocation() });
+
+      document.addEventListener('click', (e) => {
+        const target = (e.target as Element | null)?.closest?.('[data-cta]');
+        if (target) {
+          track('cta_click', {
+            ctaId: target.getAttribute('data-cta') ?? undefined,
+            page: window.location.pathname,
+          });
+        }
+      });
+    </script>
   </body>
 </html>

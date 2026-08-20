@@ -18,7 +18,7 @@ const navLinks = [
       {navLinks.map((link) => (
         <a href={link.href} class="text-sm text-body transition-colors hover:text-ink">{link.label}</a>
       ))}
-      <a href="/assessment" class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover">
+      <a href="/assessment" data-cta="header-cta-desktop" class="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover">
         Start my assessment
       </a>
     </div>
@@ -31,7 +31,7 @@ const navLinks = [
         {navLinks.map((link) => (
           <a href={link.href} class="block px-4 py-2 text-sm text-body hover:bg-surface hover:text-ink">{link.label}</a>
         ))}
-        <a href="/assessment" class="mt-2 block border-t border-hairline px-4 py-3 text-sm font-medium text-accent">Start my assessment</a>
+        <a href="/assessment" data-cta="header-cta-mobile" class="mt-2 block border-t border-hairline px-4 py-3 text-sm font-medium text-accent">Start my assessment</a>
       </div>
     </details>
   </nav>
