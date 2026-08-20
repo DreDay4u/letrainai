@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
 import WorkflowStory from '../components/WorkflowStory.astro';
-import { getAllCaseStudies } from '../lib/content';
+import { getCollection } from 'astro:content';
 
 const problems = [
   "Manual data entry that AI completes in seconds",
@@ -17,7 +17,10 @@ const services = [
   { num: "04", title: "Workflow Automation", desc: "Connect your tools so data flows automatically." },
 ];
 
-const studies = await getAllCaseStudies();
+const studies = (await getCollection('caseStudies')).sort((a, b) =>
+  new Date(b.data.publishedDate ?? b.data.date ?? 0).valueOf() -
+  new Date(a.data.publishedDate ?? a.data.date ?? 0).valueOf()
+);
 const featuredStudies = studies.slice(0, 2);
 ---
 
