@@ -1,0 +1,81 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+}
+
+const { title, description = 'AI consulting for businesses that take AI seriously. We build custom AI automation systems, AI-enhanced websites, and workflow optimization.', canonical } = Astro.props;
+const siteUrl = 'https://letrainai.com';
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="/favicon.ico" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="LeTrainAI" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "LeTrainAI",
+      url: siteUrl,
+      description: description,
+      email: "hello@letrainai.com",
+      sameAs: ["https://linkedin.com", "https://x.com"]
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "LeTrainAI",
+      url: siteUrl,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: siteUrl + '/blog?q={search_term_string}',
+        "query-input": "required name=search_term_string"
+      }
+    })} />
+  </head>
+  <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[-100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-canvas">Skip to main content</a>
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // Public analytics (Phase 6): landing_view on every page load +
+      // delegated cta_click for any [data-cta] element. Fire-and-forget.
+      import { track, utmFromLocation } from '@/lib/analytics/client';
+
+      track('landing_view', { page: window.location.pathname, utm: utmFromLocation() });
+
+      document.addEventListener('click', (e) => {
+        const target = (e.target as Element | null)?.closest?.('[data-cta]');
+        if (target) {
+          track('cta_click', {
+            ctaId: target.getAttribute('data-cta') ?? undefined,
+            page: window.location.pathname,
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import { getCollection } from 'astro:content';
+
+export const prerender = true;
+
+const posts = (await getCollection('posts')).sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function isoDate(date: Date) {
+  return date.toISOString().split('T')[0];
+}
+---
+
+<BaseLayout
+  title="Blog — LeTrainAI"
+  description="Practical insights on AI automation, implementation strategy, and getting real ROI from AI in your business."
+>
+  <main>
+    <Section maxWidth="narrow">
+      <h1 class="font-serif font-normal text-3xl tracking-tight text-ink sm:text-4xl">
+        Ideas worth implementing.
+      </h1>
+      <p class="mt-4 max-w-xl text-lg text-body">
+        Practical perspectives on AI automation, strategy, and what actually
+        works for small and mid-size businesses.
+      </p>
+
+      <div class="mt-12 border-t border-hairline">
+        {posts.map((post) => (
+          <article class="border-b border-hairline py-8">
+            <a href={`/blog/${post.id}`} class="group block">
+              <time datetime={isoDate(post.data.publishedAt)} class="font-mono text-xs text-muted">
+                {formatDate(post.data.publishedAt)}
+              </time>
+              <h2 class="mt-2 font-serif text-xl text-ink transition-colors group-hover:text-accent sm:text-2xl">
+                {post.data.title}
+              </h2>
+              <p class="mt-2 text-body">{post.data.description}</p>
+              <span class="mt-3 inline-block text-sm font-medium text-accent">
+                Read more →
+              </span>
+            </a>
+          </article>
+        ))}
+      </div>
+    </Section>
+  </main>
+</BaseLayout>

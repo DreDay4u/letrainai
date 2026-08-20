@@ -1,0 +1,137 @@
+---
+// WorkflowDiagram.astro — one SVG, three states (manual / wired / flowing).
+// state omitted  = live instance: starts in manual state, GSAP drives acts 2-3.
+// state="manual" | "wired" | "flowing" = static panels (mobile / reduced-motion).
+// No ids inside — classes only, safe to duplicate per page.
+// Node vocabulary matches existing site copy (inbox, spreadsheets, invoicing, CRM, reports, scheduling).
+interface Props {
+  state?: 'manual' | 'wired' | 'flowing';
+}
+const { state } = Astro.props;
+
+const NODES = [
+  { x: 170, y: 150, label: 'Inbox' },
+  { x: 520, y: 90, label: 'Spreadsheets' },
+  { x: 950, y: 170, label: 'Invoicing' },
+  { x: 230, y: 520, label: 'CRM' },
+  { x: 640, y: 580, label: 'Reports' },
+  { x: 990, y: 540, label: 'Scheduling' },
+];
+// 6 spokes to hub + 3 outer arcs = 9 connection paths
+const LINKS = [
+  'M 190 168 L 560 315',
+  'M 530 112 L 588 296',
+  'M 930 188 L 648 315',
+  'M 248 502 L 560 378',
+  'M 630 560 L 602 394',
+  'M 972 522 L 655 380',
+  'M 205 128 Q 400 30 590 78',
+  'M 560 76 Q 760 40 925 145',
+  'M 280 545 Q 460 650 610 598',
+];
+const HUB = { x: 600, y: 345, r: 46 };
+---
+
+<svg
+  class:list={['wsd', state && `wsd--${state}`]}
+  viewBox="0 0 1200 700"
+  role="img"
+  aria-label="Workflow diagram: scattered manual tools (Inbox, Spreadsheets, Invoicing, CRM, Reports, Scheduling) wired into one coordinated LeTrainAI system"
+  fill="none"
+>
+  {/* orchestration halo — flowing state only */}
+  <circle class="wsd-halo" cx={HUB.x} cy={HUB.y} r="225" stroke-dasharray="4 10" />
+
+  {/* connection strokes — drawn in act 2, marching in act 3 */}
+  <g class="wsd-links">
+    {LINKS.map((d) => <path class="wsd-link" d={d} />)}
+  </g>
+
+  {/* ACT 1 layer — manual, muted, scattered */}
+  <g class="wsd-manual">
+    {NODES.map((n) => (
+      <g class="wsd-node" transform={`translate(${n.x} ${n.y})`}>
+        <circle r="13" />
+        <text y="38" text-anchor="middle">{n.label}</text>
+      </g>
+    ))}
+  </g>
+
+  {/* ACT 2/3 layer — same positions, lit + wired through the hub */}
+  <g class="wsd-ai">
+    {NODES.map((n) => (
+      <g class="wsd-node" transform={`translate(${n.x} ${n.y})`}>
+        <circle r="13" />
+        <text y="38" text-anchor="middle">{n.label}</text>
+      </g>
+    ))}
+    <g class="wsd-hub" transform={`translate(${HUB.x} ${HUB.y})`}>
+      <circle r={HUB.r} />
+      <text y="6" text-anchor="middle">LeTrainAI</text>
+    </g>
+  </g>
+</svg>
+
+<style>
+  .wsd { width: 100%; height: auto; display: block; }
+
+  /* Defaults = live-instance start (act 1). GSAP tweens from here;
+     if the chunk never arrives the diagram still shows the manual world. */
+  .wsd-halo {
+    stroke: var(--color-forest-500);
+    fill: none;
+    opacity: 0;
+  }
+  .wsd-links { opacity: 0; }
+  .wsd-link {
+    stroke: var(--color-gold-500);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+  .wsd-ai { opacity: 0; }
+
+  .wsd-manual .wsd-node circle {
+    stroke: oklch(0.62 0.012 140 / 0.55);
+    stroke-width: 2;
+    fill: oklch(0.14 0.02 158 / 0.6);
+  }
+  .wsd-manual .wsd-node text {
+    fill: oklch(0.72 0.010 140 / 0.9);
+    font-family: var(--font-mono);
+    font-size: 19px;
+    letter-spacing: 0.02em;
+  }
+  .wsd-ai .wsd-node circle {
+    stroke: var(--color-gold-glow);
+    stroke-width: 2.5;
+    fill: var(--color-abyss-800);
+  }
+  .wsd-ai .wsd-node text {
+    fill: var(--color-paper-on-dark);
+    font-family: var(--font-mono);
+    font-size: 19px;
+    letter-spacing: 0.02em;
+  }
+  .wsd-hub circle {
+    stroke: var(--color-gold-glow);
+    stroke-width: 2;
+    fill: oklch(0.24 0.045 156 / 0.85);
+  }
+  .wsd-hub text {
+    fill: var(--color-gold-glow);
+    font-family: var(--font-mono);
+    font-size: 17px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Static panel states ── */
+  .wsd--manual .wsd-ai { display: none; }
+
+  .wsd--wired .wsd-links,
+  .wsd--flowing .wsd-links { opacity: 1; }
+  .wsd--wired .wsd-ai,
+  .wsd--flowing .wsd-ai { opacity: 1; }
+  .wsd--wired .wsd-manual,
+  .wsd--flowing .wsd-manual { opacity: 0.12; }
+  .wsd--flowing .wsd-halo { opacity: 0.55; }
+</style>

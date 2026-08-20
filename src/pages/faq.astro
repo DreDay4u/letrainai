@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+
+const faqGroups = [
+  {
+    title: "What AI Can Actually Do",
+    items: [
+      { q: "Can AI really handle my customer service?", a: "Yes. Modern AI handles up to 80% of routine customer questions instantly — orders, FAQs, scheduling, status updates. The remaining 20% routes to your team. This isn't chatbots from 5 years ago; today's systems understand context and nuance." },
+      { q: "What tasks should I automate first?", a: "Start with tasks that are repetitive, rule-based, and eat significant time: data entry, report generation, customer intake, appointment scheduling. These deliver measurable ROI fastest — often within the first 30 days." },
+      { q: "How much does AI implementation cost?", a: "Less than you think. Most SMB implementations pay for themselves within 60-90 days through time savings alone. We structure pricing around your ROI, not a flat software fee. Start with a free assessment to see your specific savings potential." },
+      { q: "Do I need technical staff to use AI?", a: "No. We build systems your existing team can use with minimal training. If you can use email and a web browser, you can use the AI tools we deploy." },
+    ],
+  },
+  {
+    title: "Is It Safe?",
+    items: [
+      { q: "What happens to my data?", a: "Your data stays yours. We never sell, share, or use your business data to train public models. All AI systems run on your own infrastructure or encrypted private cloud with access controls you own." },
+      { q: "Can AI make mistakes that hurt my business?", a: "AI is a tool, not a replacement for judgment. We design systems with human-in-the-loop checkpoints for any decision that carries real risk. The AI handles the repetitive 80%; your team approves anything that matters." },
+      { q: "Is my business too small for AI?", a: "If you have 5+ employees and repetitive tasks, AI can help. Some of the highest-ROI implementations we've seen are in businesses with 10-30 employees — small enough to be agile, big enough to have real inefficiencies." },
+      { q: "Will AI replace my employees?", a: "No. AI handles tasks, not jobs. It eliminates the boring parts of work so your people can focus on what humans do best: relationships, creativity, judgment, and strategy. Teams that adopt AI well become more valuable, not less." },
+    ],
+  },
+  {
+    title: "Working with LeTrainAI",
+    items: [
+      { q: "How long does implementation take?", a: "Most projects go live in 2-8 weeks, depending on scope. You'll see working prototypes within the first week — we build in iterations, not slide decks." },
+      { q: "What if I don't know what I need?", a: "That's exactly what our free AI assessment is for. It takes 3 minutes and shows you exactly where AI can save you time and money — no technical knowledge required." },
+      { q: "Do you work with businesses outside the US?", a: "Currently, we focus on US-based businesses. As our infrastructure expands, we'll open up to international clients." },
+      { q: "What does ongoing support look like?", a: "Every implementation includes 30 days of post-launch support. After that, we offer monthly retainer options for optimization, monitoring, and expanding your AI capabilities over time." },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="FAQ — LeTrainAI"
+  description="Common questions about AI consulting, implementation timelines, pricing, and what it's like to work with LeTrainAI."
+>
+  <main>
+    {/* Header */}
+    <Section maxWidth="narrow" class="pb-8">
+      <h1 class="font-serif text-4xl leading-tight text-ink sm:text-5xl">
+        What You Actually Need to Know About AI for Your Business
+      </h1>
+      <p class="mt-6 text-lg text-muted leading-relaxed">
+        No hype. No jargon. Straight answers.
+      </p>
+    </Section>
+
+    {/* FAQ accordion groups */}
+    <Section maxWidth="narrow" class="border-t border-hairline pt-12">
+      <div class="space-y-16">
+        {faqGroups.map((group) => (
+          <div>
+            <h2 class="font-serif text-xl text-muted mb-6">{group.title}</h2>
+            <div class="border-t border-hairline">
+              {group.items.map((item) => (
+                <details class="border-b border-hairline">
+                  <summary class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left [&::-webkit-details-marker]:hidden">
+                    <span class="font-medium text-ink text-lg">{item.q}</span>
+                    <svg class="h-5 w-5 shrink-0 text-muted transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </summary>
+                  <div class="grid transition-all duration-200 ease-in-out pb-5">
+                    <div class="overflow-hidden">
+                      <p class="leading-relaxed pr-8 text-body">{item.a}</p>
+                    </div>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+
+    {/* CTA */}
+    <Section class="bg-surface">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <p class="font-serif text-2xl text-ink leading-snug">
+          Still have questions? Start with a free AI assessment.
+        </p>
+        <a
+          href="/assessment"
+          class="inline-flex items-center whitespace-nowrap text-accent font-medium text-lg hover:underline shrink-0"
+        >
+          Start my assessment →
+        </a>
+      </div>
+    </Section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import { getCollection, getEntry, render } from 'astro:content';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const studies = await getCollection('caseStudies');
+  return studies.map((study) => ({ params: { slug: study.id } }));
+}
+
+const { slug } = Astro.params;
+const study = await getEntry('caseStudies', slug!);
+if (!study) return Astro.redirect('/case-studies');
+
+const { Content } = await render(study);
+---
+
+<BaseLayout title={study.data.title + ' — LeTrainAI'} description={study.data.challenge}>
+  <main>
+    <Section maxWidth="narrow">
+      <a href="/case-studies" class="text-sm text-muted transition-colors hover:text-ink">
+        ← Back to case studies
+      </a>
+
+      <article class="mt-8">
+        <div class="flex flex-wrap gap-3 text-xs">
+          <span class="rounded-full bg-surface px-3 py-1 font-mono text-muted">
+            {study.data.industry}
+          </span>
+          <span class="rounded-full bg-surface px-3 py-1 font-mono text-muted">
+            {study.data.companySize}
+          </span>
+        </div>
+
+        <h1 class="mt-4 font-serif font-normal text-3xl tracking-tight text-ink sm:text-4xl">
+          {study.data.title}
+        </h1>
+
+        {study.data.isIllustrative && (
+          <p class="mt-4 border-l-2 border-muted pl-4 text-sm italic text-muted">
+            Illustrative case study — modeled on common SMB scenarios. Not a
+            specific client engagement.
+          </p>
+        )}
+
+        <div class="mt-8 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-lg border border-hairline p-4">
+            <h3 class="font-mono text-xs uppercase tracking-wider text-muted">
+              Challenge
+            </h3>
+            <p class="mt-1 text-body">{study.data.challenge}</p>
+          </div>
+          <div class="rounded-lg border border-hairline p-4">
+            <h3 class="font-mono text-xs uppercase tracking-wider text-muted">
+              Result
+            </h3>
+            <p class="mt-1 text-body">{study.data.result}</p>
+          </div>
+        </div>
+
+        <div
+          class="mt-10 max-w-none [&_h2]:mt-8 [&_h2]:font-serif [&_h2]:text-xl [&_h2]:text-ink [&_h3]:mt-6 [&_h3]:font-serif [&_h3]:text-lg [&_h3]:text-ink [&_p]:mt-4 [&_p]:leading-relaxed [&_p]:text-body [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6 [&_blockquote]:border-l-2 [&_blockquote]:border-muted [&_blockquote]:pl-4 [&_blockquote]:italic"
+        >
+          <Content />
+        </div>
+      </article>
+
+      <div class="mt-16 border-t border-hairline pt-8">
+        <a
+          href="/assessment"
+          class="inline-flex items-center gap-1.5 text-base font-medium text-accent transition-colors hover:text-accent-hover"
+        >
+          See what AI can do for your business? Start your free assessment →
+        </a>
+      </div>
+    </Section>
+  </main>
+</BaseLayout>

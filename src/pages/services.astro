@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+
+const svc = [
+  {
+    number: "01",
+    title: "AI Automation",
+    description: "Eliminate the repetitive tasks eating your team's day. We identify the manual processes draining your hours and replace them with reliable, AI-powered automations that run around the clock without complaint.",
+    includes: ["Process automation", "Document processing", "Data extraction", "Report generation"],
+    example: "Reduce manual processing time by up to 67%",
+    bias: "left",
+  },
+  {
+    number: "02",
+    title: "AI-Enhanced Websites",
+    description: "Websites that don't just sit there — they capture leads, answer questions, and book appointments. We rebuild your digital front door so it works for you 24/7, turning visitors into booked calls without a human in the loop.",
+    includes: ["Assessment tools", "AI chat", "Smart forms", "Auto-scheduling", "SEO optimization"],
+    example: "Turn your website from a brochure into your best salesperson",
+    bias: "right",
+  },
+  {
+    number: "03",
+    title: "AI Consulting",
+    description: "Know exactly what AI can do for your business — without the enterprise price tag. We cut through the hype and show you the 2–3 highest-impact opportunities for your specific operation, grounded in real numbers.",
+    includes: ["Strategy sessions", "Opportunity audits", "Implementation roadmaps", "Team training"],
+    example: "Get a prioritized 90-day implementation plan tailored to your business",
+    bias: "left",
+  },
+  {
+    number: "04",
+    title: "Workflow Automation",
+    description: "Connect your tools so data flows automatically. No more copy-pasting between spreadsheets, CRMs, and inboxes. We wire your stack together so a single event triggers the entire downstream chain — reliably and observably.",
+    includes: ["n8n / Make integrations", "API connections", "Custom pipelines", "Error monitoring"],
+    example: "Eliminate the 5+ hours/week your team spends on manual data transfer",
+    bias: "right",
+  },
+];
+---
+
+<BaseLayout
+  title="Services — LeTrainAI"
+  description="AI automation, AI-enhanced websites, AI consulting, and workflow automation designed to deliver measurable ROI within 90 days."
+>
+  <main class="bg-canvas text-body">
+    {/* Header */}
+    <Section maxWidth="narrow" class="pb-12 sm:pb-16 pt-24 sm:pt-32">
+      <div class="border-b border-hairline pb-12">
+        <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-6">
+          Services
+        </p>
+        <h1 class="font-serif text-4xl sm:text-5xl text-ink leading-[1.05]">
+          4 Ways We Put AI to Work for Your Business
+        </h1>
+        <p class="mt-6 text-lg text-muted max-w-xl">
+          Each service is designed to deliver measurable ROI within 90 days.
+        </p>
+      </div>
+    </Section>
+
+    {/* Service entries — vertical editorial, alternating bias */}
+    {svc.map((service, idx) => (
+      <Section maxWidth="default" class={idx === svc.length - 1 ? "" : ""}>
+        <div class="border-b border-hairline pb-16 sm:pb-20">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-x-12 gap-y-8 items-start">
+            {service.bias === "left" ? (
+              <div class="lg:col-span-5">
+                <span class="font-mono text-6xl text-muted/30 leading-none block mb-5">{service.number}</span>
+                <h2 class="font-serif text-3xl sm:text-4xl text-ink leading-tight">{service.title}</h2>
+              </div>
+              <div class="lg:col-span-7 lg:pt-16">
+                <div>
+                  <p class="text-lg text-body leading-relaxed mb-8">{service.description}</p>
+                  <div class="mb-8">
+                    <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-4">What we do</p>
+                    <ul class="space-y-2.5">
+                      {service.includes.map((item) => (
+                        <li class="flex items-baseline gap-3 text-body">
+                          <span class="font-mono text-accent text-sm shrink-0">—</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div class="border-l-2 border-accent pl-4 mb-8">
+                    <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-1.5">Example outcome</p>
+                    <p class="font-serif text-lg text-ink leading-snug">{service.example}</p>
+                  </div>
+                  <a href="/contact" class="font-sans text-sm text-accent underline-offset-4 hover:underline transition-colors">
+                    Discuss this service →
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div class="lg:col-span-7 lg:order-2 lg:pt-16">
+                <div>
+                  <p class="text-lg text-body leading-relaxed mb-8">{service.description}</p>
+                  <div class="mb-8">
+                    <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-4">What we do</p>
+                    <ul class="space-y-2.5">
+                      {service.includes.map((item) => (
+                        <li class="flex items-baseline gap-3 text-body">
+                          <span class="font-mono text-accent text-sm shrink-0">—</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div class="border-l-2 border-accent pl-4 mb-8">
+                    <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-1.5">Example outcome</p>
+                    <p class="font-serif text-lg text-ink leading-snug">{service.example}</p>
+                  </div>
+                  <a href="/contact" class="font-sans text-sm text-accent underline-offset-4 hover:underline transition-colors">
+                    Discuss this service →
+                  </a>
+                </div>
+              </div>
+              <div class="lg:col-span-5 lg:order-1 lg:pt-16 lg:text-right">
+                <span class="font-mono text-6xl text-muted/30 leading-none block mb-5">{service.number}</span>
+                <h2 class="font-serif text-3xl sm:text-4xl text-ink leading-tight">{service.title}</h2>
+              </div>
+            )}
+          </div>
+        </div>
+      </Section>
+    ))}
+
+    {/* CTA */}
+    <section class="bg-surface border-t border-hairline">
+      <Section maxWidth="narrow" class="py-20 sm:py-28">
+        <div class="text-center">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-5">
+            Get started
+          </p>
+          <h2 class="font-serif text-3xl sm:text-4xl text-ink leading-tight max-w-2xl mx-auto">
+            Not sure which service fits? Start with a free AI assessment.
+          </h2>
+          <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+            <a
+              href="/assessment"
+              class="inline-flex items-center gap-2 rounded-lg bg-accent px-7 py-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            >
+              Start my assessment
+              <span aria-hidden="true">→</span>
+            </a>
+            <a
+              href="/contact"
+              class="font-sans text-sm text-accent underline-offset-4 hover:underline transition-colors"
+            >
+              Or book a strategy call →
+            </a>
+          </div>
+        </div>
+      </Section>
+    </section>
+  </main>
+</BaseLayout>

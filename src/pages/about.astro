@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+
+const capabilities = [
+  { label: "Custom AI agents", description: "Purpose-built for your workflows" },
+  { label: "Workflow enterprises", description: "Automated multi-step processes" },
+  { label: "Knowledge graphs", description: "Your business data, structured and queryable" },
+  { label: "API integrations", description: "Connected to your existing tools" },
+];
+---
+
+<BaseLayout
+  title="About — LeTrainAI"
+  description="LeTrainAI was founded to bring enterprise-grade AI capability to small and mid-size businesses — without the enterprise price tag or timeline."
+>
+  <main>
+    {/* Hero — left-biased, editorial */}
+    <Section>
+      <div class="flex flex-col gap-12 sm:flex-row sm:items-start">
+        {/* Photo placeholder */}
+        <div class="aspect-square w-full max-w-xs shrink-0 rounded-sm border border-hairline bg-surface"></div>
+
+        {/* Name + value prop */}
+        <div class="flex flex-col justify-center sm:pt-8">
+          <h1 class="font-serif text-4xl text-ink sm:text-5xl">
+            Andre LeTren
+          </h1>
+          <p class="mt-2 text-muted-foreground">Founder, LeTrainAI</p>
+          <p class="mt-6 max-w-md text-lg text-body leading-relaxed">
+            Making enterprise-grade AI accessible to businesses that can't
+            afford a $500K consultant.
+          </p>
+        </div>
+      </div>
+    </Section>
+
+    {/* Story — narrow width for readability */}
+    <Section maxWidth="narrow" class="border-t border-hairline">
+      <div class="space-y-6">
+        <p class="text-lg leading-relaxed text-body">
+          I started LeTrainAI after watching small businesses get left behind
+          by the AI revolution. While enterprise companies invested millions
+          in AI infrastructure, the businesses that employ most Americans were
+          stuck doing everything by hand.
+        </p>
+        <p class="text-lg leading-relaxed text-body">
+          The problem isn't that AI is too expensive or too complex.
+          It's that nobody has built the bridge between cutting-edge AI
+          and the businesses that need it most.
+        </p>
+        <p class="text-lg leading-relaxed text-body">
+          That's what LeTrainAI does. We don't sell software — we
+          build systems that work while you sleep, so your team can focus on
+          what humans do best.
+        </p>
+      </div>
+    </Section>
+
+    {/* Capabilities — DARK section, the "wow" moment */}
+    <section class="bg-dark-surface px-6 py-16 sm:py-24">
+      <div class="mx-auto w-full max-w-6xl">
+        <h2 class="font-serif text-3xl text-canvas sm:text-4xl">
+          This isn't ChatGPT with a wrapper.
+        </h2>
+        <p class="mt-4 text-canvas/70">
+          LeTrainAI runs on real AI infrastructure:
+        </p>
+
+        <ul class="mt-10 space-y-8">
+          {capabilities.map((cap) => (
+            <li class="flex flex-col gap-1 sm:flex-row sm:gap-8">
+              <span class="w-56 shrink-0 font-mono text-sm text-canvas">{cap.label}</span>
+              <span class="leading-relaxed text-canvas/60">{cap.description}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    {/* Trust + CTA — surface bg */}
+    <Section class="bg-surface">
+      <div class="grid gap-12 sm:grid-cols-2">
+        {/* Left: facts */}
+        <div class="space-y-3">
+          <p class="text-body">
+            Based in <span class="text-ink">[City, State]</span>
+          </p>
+          <p class="text-body">Available remotely across the US</p>
+          <p class="text-body">
+            <a
+              href="mailto:andre@letrainai.com"
+              class="text-accent hover:text-accent-hover underline underline-offset-4 decoration-hairline"
+            >
+              andre@letrainai.com
+            </a>
+          </p>
+        </div>
+
+        {/* Right: CTA */}
+        <div class="flex items-center sm:justify-end">
+          <a
+            href="/contact"
+            class="font-serif text-2xl text-ink hover:text-accent transition-colors"
+          >
+            Let's talk about your AI future →
+          </a>
+        </div>
+      </div>
+    </Section>
+  </main>
+</BaseLayout>

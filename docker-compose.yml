@@ -1,24 +1,26 @@
 services:
-  web:
+  astro:
     build:
       context: .
-      args:
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-        SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-        DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
-        R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
-        R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
-        R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
-        R2_BUCKET_NAME: ${R2_BUCKET_NAME}
-        R2_S3_ENDPOINT: ${R2_S3_ENDPOINT}
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      # ZERO build args — secretless build. All secrets enter at runtime
+      # via env_file below, never baked into image layers.
+    image: letrainai-astro:latest
     ports:
-      - "127.0.0.1:3102:3102"
-    restart: unless-stopped
-    init: true
+      - "127.0.0.1:3103:3103" # port-governance: astro-preview, loopback-only
+    environment:
+      PORT: "3103"
+      HOST: "0.0.0.0"
+      NODE_ENV: production
     env_file:
-      - .env.local
+      - .env.local # runtime injection only
+    restart: unless-stopped
+    init: true # zombie reaping (compose-managed init, no dumb-init needed)
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3103/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
     networks:
       - coolify
       - supabase_default
