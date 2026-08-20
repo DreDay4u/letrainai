@@ -1,9 +1,10 @@
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 import react from '@astrojs/react';
+import mdx from '@astrojs/mdx';
+import keystatic from '@keystatic/astro';
 import tailwindcss from '@tailwindcss/vite';
 
-// Keystatic integration deferred to Phase 3 (deps installed, not wired yet).
 export default defineConfig({
   site: 'https://letrainai.com',
   output: 'server',
@@ -12,7 +13,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: Number(process.env.PORT) || 4321,
   },
-  integrations: [react()],
+  integrations: [react(), mdx(), keystatic()],
   adapter: node({ mode: 'standalone' }),
   vite: {
     plugins: [tailwindcss()],

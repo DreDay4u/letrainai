@@ -1,23 +1,6 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+// Legacy CMS URL: /dreday4u used to be the Keystatic admin catch-all in the
+// Next.js app. The Astro admin now lives at /keystatic — keep URL compatibility
+// with a permanent redirect.
+return Astro.redirect('/keystatic', 302);
 ---
-
-<BaseLayout
-  title="DreDay4u — LeTrainAI"
-  description="DreDay4u internal content management."
->
-  <main class="bg-canvas text-body">
-    <div class="px-6 py-16 sm:py-24">
-      <div class="mx-auto w-full max-w-3xl">
-        <h1 class="font-serif text-4xl text-ink sm:text-5xl">DreDay4u</h1>
-        <p class="mt-6 text-lg text-body leading-relaxed">
-          Content management for LeTrainAI. The editorial CMS interface is being
-          migrated to the new platform and will return shortly.
-        </p>
-        <a href="/" class="mt-8 inline-flex items-center gap-1.5 text-base font-medium text-accent hover:text-accent-hover transition-colors">
-          ← Back to LeTrainAI home
-        </a>
-      </div>
-    </div>
-  </main>
-</BaseLayout>

@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
-import { getAllPosts, getAllCaseStudies } from '../lib/content';
+import { getCollection } from 'astro:content';
+
+export const prerender = true;
 
 export const GET: APIRoute = async () => {
   const baseUrl = 'https://letrainai.com';
@@ -7,8 +9,8 @@ export const GET: APIRoute = async () => {
     '/', '/services', '/about', '/assessment', '/process',
     '/faq', '/contact', '/blog', '/case-studies',
   ];
-  const posts = await getAllPosts();
-  const studies = await getAllCaseStudies();
+  const posts = await getCollection('posts');
+  const studies = await getCollection('caseStudies');
 
   interface Entry {
     loc: string;
@@ -24,13 +26,13 @@ export const GET: APIRoute = async () => {
       priority: r === '/' ? '1.0' : r === '/services' || r === '/assessment' ? '0.9' : '0.7',
     })),
     ...posts.map((p) => ({
-      loc: baseUrl + '/blog/' + p.slug,
+      loc: baseUrl + '/blog/' + p.id,
       changefreq: 'yearly',
       priority: '0.6',
-      lastmod: p.publishedAt,
+      lastmod: p.data.publishedAt.toISOString().split('T')[0],
     })),
     ...studies.map((s) => ({
-      loc: baseUrl + '/case-studies/' + s.slug,
+      loc: baseUrl + '/case-studies/' + s.id,
       changefreq: 'yearly',
       priority: '0.6',
     })),

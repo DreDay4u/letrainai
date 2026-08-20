@@ -1,12 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/Section.astro';
-import { getAllPosts } from '../lib/content';
+import { getCollection } from 'astro:content';
 
-const posts = await getAllPosts();
+export const prerender = true;
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+const posts = (await getCollection('posts')).sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+
+function formatDate(date: Date) {
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function isoDate(date: Date) {
+  return date.toISOString().split('T')[0];
 }
 ---
 
@@ -27,14 +35,14 @@ function formatDate(iso: string) {
       <div class="mt-12 border-t border-hairline">
         {posts.map((post) => (
           <article class="border-b border-hairline py-8">
-            <a href={`/blog/${post.slug}`} class="group block">
-              <time datetime={post.publishedAt} class="font-mono text-xs text-muted">
-                {formatDate(post.publishedAt)}
+            <a href={`/blog/${post.id}`} class="group block">
+              <time datetime={isoDate(post.data.publishedAt)} class="font-mono text-xs text-muted">
+                {formatDate(post.data.publishedAt)}
               </time>
               <h2 class="mt-2 font-serif text-xl text-ink transition-colors group-hover:text-accent sm:text-2xl">
-                {post.title}
+                {post.data.title}
               </h2>
-              <p class="mt-2 text-body">{post.description}</p>
+              <p class="mt-2 text-body">{post.data.description}</p>
               <span class="mt-3 inline-block text-sm font-medium text-accent">
                 Read more →
               </span>
