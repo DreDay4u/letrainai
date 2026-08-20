@@ -1,15 +1,96 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-/* Placeholder design tokens — Phase 2 will port the real palette. */
-:root {
-  --color-bg: #0a0a0a;
-  --color-fg: #fafafa;
-  --color-accent: #3b82f6;
+/* Self-hosted fonts (fontsource) — replaces next/font/google:
+   Fraunces (300/400/500 latin), Inter (latin, variable), Geist Mono (400 latin).
+   Weight/metric-compatible with the legacy next/font setup. */
+@import "@fontsource/fraunces/300.css";
+@import "@fontsource/fraunces/400.css";
+@import "@fontsource/fraunces/500.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource/geist-mono/400.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* Brand colors — "The Institution" */
+  --color-canvas: #FAF8F3;
+  --color-surface: #F2DEE4;
+  --color-surface-deep: #E8E0D2;
+  --color-ink: #1A1816;
+  --color-body: #3D3A35;
+  --color-muted: #8A847B;
+  --color-hairline: #D9D2C6;
+  --color-accent: #1B4332;
+  --color-accent-hover: #2D6A4F;
+  --color-gold: #B8860B;
+  --color-dark-surface: #1F1E1B;
+
+  /* shadcn semantic mappings */
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-canvas);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-surface-deep);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-surface-deep);
+  --color-muted-foreground: var(--color-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-border: var(--color-hairline);
+  --color-input: var(--color-hairline);
+  --color-ring: var(--color-accent);
+  --color-chart-1: var(--color-accent);
+  --color-chart-2: var(--color-gold);
+  --color-chart-3: var(--color-muted);
+  --color-chart-4: var(--color-surface-deep);
+  --color-chart-5: var(--color-ink);
+  --color-sidebar: var(--color-surface);
+  --color-sidebar-foreground: var(--color-ink);
+  --color-sidebar-primary: var(--color-accent);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: var(--color-surface-deep);
+  --color-sidebar-accent-foreground: var(--color-accent);
+  --color-sidebar-border: var(--color-hairline);
+  --color-sidebar-ring: var(--color-accent);
+
+  /* Fonts */
+  --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-mono: 'Geist Mono', monospace;
+  --font-heading: 'Fraunces', Georgia, serif;
+
+  --radius: 0.5rem;
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.7);
+  --radius-2xl: calc(var(--radius) * 2.2);
+  --radius-3xl: calc(var(--radius) * 2.6);
+  --radius-4xl: calc(var(--radius) * 3);
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  background: var(--color-bg);
-  color: var(--color-fg);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-canvas text-body;
+    font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    color: var(--color-ink);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
 }

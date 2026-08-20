@@ -1,0 +1,13 @@
+---
+interface Props {
+  class?: string;
+  maxWidth?: "default" | "narrow";
+}
+const { class: className, maxWidth = "default" } = Astro.props;
+---
+
+<section class:list={["px-6 py-16 sm:py-24", className]}>
+  <div class={maxWidth === "default" ? "mx-auto w-full max-w-6xl" : "mx-auto w-full max-w-3xl"}>
+    <slot />
+  </div>
+</section>

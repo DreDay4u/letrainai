@@ -1,19 +1,107 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+
+const problems = [
+  "Manual data entry that AI completes in seconds",
+  "Customer questions answered by a bot that never sleeps",
+  "Reports generated automatically — no more late nights in Excel",
+];
+
+const services = [
+  { num: "01", title: "AI Automation", desc: "Eliminate repetitive tasks eating your team's day." },
+  { num: "02", title: "AI-Enhanced Websites", desc: "Sites that capture leads, answer questions, book appointments." },
+  { num: "03", title: "AI Consulting", desc: "Strategy without the enterprise price tag." },
+  { num: "04", title: "Workflow Automation", desc: "Connect your tools so data flows automatically." },
+];
 ---
 
-<BaseLayout title="LeTrainAI — AI Consulting That Ships">
-  <section class="flex flex-col items-center justify-center px-6 py-32 text-center">
-    <h1 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-6xl">
-      AI Consulting That Ships
-    </h1>
-    <p class="mt-6 max-w-2xl text-lg text-white/70">
-      Practical AI strategy, automation, and implementation for businesses that want
-      real outcomes — not demos. Assessment to deployment, end to end.
-    </p>
-    <div class="mt-10 flex gap-4">
-      <a href="/assessment" class="rounded-lg bg-blue-600 px-6 py-3 font-medium hover:bg-blue-500">Take the Assessment</a>
-      <a href="/contact" class="rounded-lg border border-white/20 px-6 py-3 font-medium hover:bg-white/10">Get in Touch</a>
-    </div>
-  </section>
+<BaseLayout title="LeTrainAI — AI Consulting for Business">
+  <main>
+    {/* Hero — left-biased, content-height */}
+    <Section>
+      <div class="max-w-2xl">
+        <h1 class="font-serif font-normal text-4xl sm:text-5xl lg:text-6xl tracking-tight text-ink">
+          Stop losing $47,000/year to tasks your competitors already
+          automated.
+        </h1>
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-body">
+          LeTrainAI builds custom AI systems that handle your repetitive work —
+          so your team focuses on growth, not busywork.
+        </p>
+        <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <a
+            href="/assessment"
+            class="inline-flex items-center justify-center rounded-md bg-accent px-6 py-3 text-sm font-medium text-canvas transition-colors hover:bg-accent-hover"
+          >
+            Start my free AI assessment
+          </a>
+          <a
+            href="/process"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-accent transition-colors hover:text-accent-hover"
+          >
+            See how it works
+            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </Section>
+
+    {/* Problem (PAS — Problem) */}
+    <Section class="bg-surface" maxWidth="narrow">
+      <h2 class="font-serif font-normal text-2xl tracking-tight text-ink sm:text-3xl">
+        Most businesses waste 15+ hours every week on work AI should be doing.
+      </h2>
+      <ul class="mt-10 space-y-6">
+        {problems.map((p) => (
+          <li class="border-l-2 border-accent pl-4 text-lg text-body">{p}</li>
+        ))}
+      </ul>
+    </Section>
+
+    {/* Solution */}
+    <Section maxWidth="narrow">
+      <h2 class="font-serif font-normal text-2xl tracking-tight text-ink sm:text-3xl">
+        We build the AI systems that do that work for you.
+      </h2>
+      <div class="mt-10 border-t border-hairline">
+        {services.map((s) => (
+          <a href="/services" class="group flex gap-4 border-b border-l-2 border-transparent border-t-transparent py-6 pl-4 transition-colors hover:border-l-accent sm:gap-6">
+            <span class="font-mono text-sm text-muted">{s.num}</span>
+            <div>
+              <h3 class="font-serif text-xl text-ink transition-colors group-hover:text-accent">{s.title}</h3>
+              <p class="mt-1.5 text-body">{s.desc}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </Section>
+
+    {/* Proof — genuine scarcity */}
+    <Section class="bg-dark-surface" maxWidth="narrow">
+      <h2 class="font-serif font-normal text-2xl tracking-tight text-canvas sm:text-3xl">
+        Be among our first 10 clients.
+      </h2>
+      <p class="mt-4 max-w-xl text-lg leading-relaxed text-hairline">
+        Finding clients receive priority implementation and founding-partner
+        pricing.
+      </p>
+    </Section>
+
+    {/* Assessment CTA Band */}
+    <Section class="bg-surface">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <h2 class="max-w-lg font-serif font-normal text-2xl tracking-tight text-ink sm:text-3xl">
+          See your AI opportunity in 3 minutes.
+        </h2>
+        <a
+          href="/assessment"
+          class="inline-flex shrink-0 items-center gap-1.5 text-base font-medium text-accent transition-colors hover:text-accent-hover"
+        >
+          Start my free assessment
+          <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </Section>
+  </main>
 </BaseLayout>

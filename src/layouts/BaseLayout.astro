@@ -6,9 +6,12 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  canonical?: string;
 }
 
-const { title, description = 'LeTrainAI — practical AI consulting for real business outcomes.' } = Astro.props;
+const { title, description = 'AI consulting for businesses that take AI seriously. We build custom AI automation systems, AI-enhanced websites, and workflow optimization.', canonical } = Astro.props;
+const siteUrl = 'https://letrainai.com';
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href;
 ---
 
 <!doctype html>
@@ -16,13 +19,44 @@ const { title, description = 'LeTrainAI — practical AI consulting for real bus
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
-    <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="/favicon.ico" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="LeTrainAI" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "LeTrainAI",
+      url: siteUrl,
+      description: description,
+      email: "hello@letrainai.com",
+      sameAs: ["https://linkedin.com", "https://x.com"]
+    })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "LeTrainAI",
+      url: siteUrl,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: siteUrl + '/blog?q={search_term_string}',
+        "query-input": "required name=search_term_string"
+      }
+    })} />
   </head>
   <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[-100] focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-canvas">Skip to main content</a>
     <Header />
-    <main class="min-h-screen">
+    <main id="main-content">
       <slot />
     </main>
     <Footer />

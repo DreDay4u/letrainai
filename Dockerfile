@@ -12,6 +12,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/content ./src/content
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 EXPOSE 4321
