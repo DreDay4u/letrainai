@@ -1,0 +1,240 @@
+---
+// WorkflowStory.astro — THE cinematic scrollytelling section (Direction C).
+// Desktop + motion allowed: CSS-sticky pinned stage, one SVG morphing through
+// 3 acts, scrubbed by GSAP (lazy chunk, loads only as section approaches).
+// Mobile / touch / reduced-motion / no-JS: readable static 3-panel sequence,
+// zero GSAP bytes. Copy mirrors existing homepage claims (15+ hrs, $47,000).
+import WorkflowDiagram from './WorkflowDiagram.astro';
+
+const acts = [
+  {
+    act: 'manual',
+    title: 'Today: manual and disconnected',
+    body: 'Six tools that never talk. Your team re-enters the same data and burns 15+ hours a week.',
+    state: 'manual' as const,
+  },
+  {
+    act: 'connect',
+    title: 'We connect the pieces',
+    body: 'LeTrainAI wires your tools into one system. Data moves itself.',
+    state: 'wired' as const,
+  },
+  {
+    act: 'flow',
+    title: 'One coordinated workflow',
+    body: 'Inbox, CRM, invoicing, reports, scheduling: everything works while you sleep.',
+    state: 'flowing' as const,
+  },
+];
+---
+
+<section id="workflow-story" class="ws color-scheme-dark" aria-label="How LeTrain AI transforms a manual workflow into a coordinated system">
+  <div class="ws-stage">
+    <div class="ws-deepen" aria-hidden="true"></div>
+
+    {/* Live pinned instance (desktop + motion). Diagram starts in manual state;
+        GSAP drives acts 2-3. If the chunk never loads, the static panels below
+        remain the experience. */}
+    <div class="ws-live" aria-hidden="true">
+      <div class="ws-grid">
+        <div class="ws-captions">
+          {acts.map((a) => (
+            <div class="ws-caption" data-act={a.act}>
+              <h3>{a.title}</h3>
+              <p>{a.body}</p>
+              {a.act === 'flow' && (
+                <div class="ws-stats">
+                  <div class="ws-stat">
+                    <span class="ws-num" data-count="15" data-suffix="+">15+</span>
+                    <span class="ws-stat-label">hours reclaimed every week</span>
+                  </div>
+                  <div class="ws-stat">
+                    <span class="ws-num" data-count="47000" data-prefix="$">$47,000</span>
+                    <span class="ws-stat-label">a year, back in your business</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <div class="ws-visual">
+          <WorkflowDiagram />
+        </div>
+      </div>
+    </div>
+
+    {/* Static 3-panel sequence: mobile, touch, reduced-motion, no-JS */}
+    <div class="ws-static">
+      {acts.map((a, i) => (
+        <div class="ws-panel">
+          <p class="ws-panel-step font-mono">{String(i + 1).padStart(2, '0')}</p>
+          <h3>{a.title}</h3>
+          <p class="ws-panel-body">{a.body}</p>
+          {a.act === 'flow' && (
+            <div class="ws-stats ws-stats-static">
+              <div class="ws-stat">
+                <span class="ws-num">15+</span>
+                <span class="ws-stat-label">hours reclaimed every week</span>
+              </div>
+              <div class="ws-stat">
+                <span class="ws-num">$47,000</span>
+                <span class="ws-stat-label">a year, back in your business</span>
+              </div>
+            </div>
+          )}
+          <WorkflowDiagram state={a.state} />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ws {
+    background: var(--color-abyss-900);
+    color: var(--color-mist-on-dark);
+    overflow: clip; /* guards horizontal scroll from diagram edges */
+  }
+  .ws h3 {
+    font-family: var(--font-serif);
+    color: var(--color-paper-on-dark);
+    font-size: 1.65rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .ws-deepen {
+    position: absolute;
+    inset: 0;
+    background: var(--color-abyss-950);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ── Live instance: hidden until JS upgrades (progressive enhancement) ── */
+  .ws-live { display: none; }
+
+  /* ── Static sequence (default for everyone) ── */
+  .ws-static {
+    position: relative;
+    display: grid;
+    gap: clamp(3rem, 8vw, 5rem);
+    padding: clamp(4rem, 10vw, 7rem) 1.5rem;
+    max-width: 46rem;
+    margin-inline: auto;
+  }
+  .ws-panel-step {
+    color: var(--color-gold-glow);
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    margin-bottom: 0.75rem;
+  }
+  .ws-panel-body { margin-top: 0.75rem; max-width: 34rem; }
+  .ws-panel :global(.wsd) {
+    margin-top: 1.75rem;
+    border: 1px solid oklch(1 0 0 / 0.07);
+    border-radius: var(--radius-lg);
+    background: oklch(0.145 0.025 160 / 0.5);
+    padding: 0.75rem;
+  }
+  /* flowing panel: links march (desktop, motion allowed only) */
+  @media (min-width: 48rem) and (prefers-reduced-motion: no-preference) {
+    .ws-panel :global(.wsd--flowing) :global(.wsd-link) {
+      stroke-dasharray: 5 23;
+      animation: march 1.6s linear infinite;
+    }
+    .ws-panel :global(.wsd--flowing) :global(.wsd-halo) { opacity: 0.5; }
+  }
+
+  .ws-stats {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .ws-num {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    color: var(--color-gold-glow);
+    display: block;
+  }
+  .ws-stat-label {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--color-mist-on-dark);
+    max-width: 14rem;
+  }
+
+  /* ── JS-upgraded pinned experience (desktop, motion allowed) ── */
+  @media (min-width: 48rem) {
+    .ws.ws-js .ws-live { display: block; }
+    .ws.ws-js .ws-static { display: none; }
+
+    .ws.ws-js { height: 400svh; }
+    .ws-stage {
+      position: relative;
+    }
+    .ws.ws-js .ws-stage {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      display: flex;
+      align-items: center;
+    }
+    .ws-live { position: relative; z-index: 1; width: 100%; }
+    .ws-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 2rem;
+      align-items: center;
+      width: 100%;
+      max-width: 72rem;
+      margin-inline: auto;
+      padding-inline: 2rem;
+    }
+    .ws-captions { position: relative; min-height: 15rem; }
+    .ws-caption {
+      position: absolute;
+      inset-block: 0;
+      inset-inline: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 26rem;
+    }
+    .ws-caption p { margin-top: 1rem; max-width: 24rem; }
+    .ws-visual { min-width: 0; }
+    .ws-visual :global(.wsd) { max-height: 78svh; width: 100%; }
+  }
+</style>
+
+<script>
+  // Loader: desktop + fine pointer + motion allowed -> observe approach,
+  // then dynamically import the GSAP module (its own chunk, ~51KB gz).
+  // Everyone else: 0 bytes of GSAP, static sequence above.
+  const root = document.getElementById('workflow-story');
+  const allowed =
+    root !== null &&
+    !matchMedia('(prefers-reduced-motion: reduce)').matches &&
+    matchMedia('(min-width: 48rem)').matches &&
+    !matchMedia('(hover: none)').matches;
+  if (root && allowed) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          import('../scripts/workflow-story')
+            .then((m) => {
+              root.classList.add('ws-js');
+              m.init(root);
+            })
+            .catch(() => {
+              /* static sequence remains the experience */
+            });
+        }
+      },
+      { rootMargin: '900px 0px' }
+    );
+    io.observe(root);
+  }
+</script>
