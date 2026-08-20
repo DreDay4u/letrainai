@@ -1,0 +1,32 @@
+services:
+  astro:
+    build:
+      context: .
+      # ZERO build args — secretless build. All secrets enter at runtime
+      # via env_file below, never baked into image layers.
+    image: letrainai-astro:latest
+    ports:
+      - "127.0.0.1:3103:3103" # port-governance: astro-preview, loopback-only
+    environment:
+      PORT: "3103"
+      HOST: "0.0.0.0"
+      NODE_ENV: production
+    env_file:
+      - .env.local # runtime injection only
+    restart: unless-stopped
+    init: true # zombie reaping (compose-managed init, no dumb-init needed)
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3103/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+    networks:
+      - coolify
+      - supabase_default
+
+networks:
+  coolify:
+    external: true
+  supabase_default:
+    external: true

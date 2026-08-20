@@ -1,8 +1,10 @@
 node_modules
+.next
 dist
 .astro
 legacy-next
 graphify-out
 migration-notes
 .git
-.env*
+.env
+.env.*
