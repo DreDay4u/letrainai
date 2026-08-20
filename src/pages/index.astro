@@ -17,9 +17,9 @@ const services = [
   { num: "04", title: "Workflow Automation", desc: "Connect your tools so data flows automatically." },
 ];
 
+// Alphabetical by id — matches the legacy loader's readdirSync order (same as /case-studies).
 const studies = (await getCollection('caseStudies')).sort((a, b) =>
-  new Date(b.data.publishedDate ?? b.data.date ?? 0).valueOf() -
-  new Date(a.data.publishedDate ?? a.data.date ?? 0).valueOf()
+  a.id.localeCompare(b.id),
 );
 const featuredStudies = studies.slice(0, 2);
 ---
