@@ -163,15 +163,20 @@ export default function AssessmentWizard() {
     }
     setStepError("");
     setStep((s) => {
-      const target = Math.min(s + 1, TOTAL_QUESTIONS);
-      // Email step (1.5) renders only until the email is captured.
-      return target === 1.5 && emailCaptured ? target + 1 : target;
+      // Explicit transitions — fractional email step must never ride +1 math.
+      if (s === 1) return emailCaptured ? 2 : 1.5;
+      if (s === 1.5) return 2;
+      return Math.min(s + 1, TOTAL_QUESTIONS);
     });
   };
 
   const back = () => {
     setStepError("");
-    setStep((s) => Math.max(s - 1, 1));
+    setStep((s) => {
+      if (s === 1.5) return 1;
+      if (s === 2) return emailCaptured ? 1 : 1.5;
+      return Math.max(s - 1, 1);
+    });
   };
 
   const handleSubmit = async () => {
@@ -244,7 +249,7 @@ export default function AssessmentWizard() {
     setEmailStatus("done");
     setEmailCaptured(true);
     track("email_captured_start", { sessionId });
-    setStep((s) => Math.min(s + 1, TOTAL_QUESTIONS));
+    setStep(2); // explicit: email step (1.5) always advances to question 2
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
