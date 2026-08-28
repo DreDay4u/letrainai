@@ -21,6 +21,7 @@ export const PUBLIC_EVENT_NAMES = [
   "assessment_generated",
   "assessment_failed",
   "email_capture_submit",
+  "email_captured_start",
   "contact_start",
   "contact_submit",
   "lead_created",

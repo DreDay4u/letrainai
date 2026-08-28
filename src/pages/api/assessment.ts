@@ -78,17 +78,24 @@ export const POST: APIRoute = async ({ request }) => {
   cacheResult(sessionId, result);
 
   // Best-effort persistence: save the result to Supabase. A DB failure
-  // must never break the user's response.
+  // must never break the user's response. Upsert on session_id: with
+  // capture-at-start the row may already exist ('started'), and the
+  // unique index on session_id would reject a plain INSERT here.
   if (isSupabaseConfigured) {
     try {
-      const { error } = await supabase.from("assessment_results").insert({
+      const updates: Record<string, unknown> = {
         session_id: sessionId,
         industry: answers.industry,
         company_size: answers.company_size,
         responses: answers,
         recommendation: result,
         status: "completed",
-      });
+      };
+      // NOTE: email is intentionally not set here — the capture-at-start row
+      // already carries it, and a PostgREST upsert leaves absent columns as-is.
+      const { error } = await supabase
+        .from("assessment_results")
+        .upsert(updates, { onConflict: "session_id" });
       if (error) {
         console.error("[assessment] Failed to persist result to Supabase:", error);
       }

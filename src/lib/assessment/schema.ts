@@ -62,6 +62,11 @@ export const emailRequestSchema = z.object({
   email: z.string().email().max(254),
 });
 
+export const assessmentStartRequestSchema = z.object({
+  session_id: z.string().min(1).max(64),
+  email: z.string().email().max(254),
+});
+
 export type AssessmentAnswers = z.infer<typeof answersSchema>;
 export type AssessmentResult = z.infer<typeof assessmentResultSchema>;
 export type AssessmentRequest = z.infer<typeof assessmentRequestSchema>;

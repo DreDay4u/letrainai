@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# letrainai.com
 
-## Getting Started
+Marketing + lead-gen site for LeTrain AI. **Astro 7 SSR** (`@astrojs/node`), React 19 islands, Tailwind 4, Keystatic CMS, self-hosted Supabase (leads, assessment results, analytics events), DeepSeek-powered assessment generator with deterministic fallback.
 
-First, run the development server:
+## Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev      # astro dev
+npm run build    # astro build (server output)
+npm run check    # astro check (typecheck)
+npm test         # node tests/assessment.test.mjs && node tests/contact-events.test.mjs
+npm start        # node ./dist/server/entry.mjs
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Push to `main` → GitHub → Coolify webhook → container rebuild → `/api/health` gate. Container serves loopback `:3103` inside the `coolify` + `supabase_default` docker networks; Cloudflare fronts the public domain.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> Note for local runs: `.env.local` points Supabase at `http://supabase-kong:8000`, a docker-network hostname. On the host, override `NEXT_PUBLIC_SUPABASE_URL` (e.g. the Kong bridge IP) or persistence is silently skipped.
 
-## Learn More
+## Key surfaces
 
-To learn more about Next.js, take a look at the following resources:
+- `/assessment` — 5-question AI assessment; email captured at start (`/api/assessment/start`), completion upserts the same row (`/api/assessment`)
+- `/contact` — lead form (`contact_leads`)
+- `/api/health`, `/api/events` — healthcheck + analytics ingest
+- DB schema changes: `supabase/migrations/*.sql`, applied manually to the self-hosted instance (verified pre-apply on empty/low-risk tables)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Ops
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Maintained by the LeTrainAI agent (Hermes profile `letrenai`). Fleet docs: `~/brain/agents/letrenai.md`.

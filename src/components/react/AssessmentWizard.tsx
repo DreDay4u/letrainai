@@ -128,6 +128,8 @@ export default function AssessmentWizard() {
   const [emailStatus, setEmailStatus] = useState<"idle" | "submitting" | "done">(
     "idle"
   );
+  const [emailCaptured, setEmailCaptured] = useState(false);
+  const [emailStepError, setEmailStepError] = useState("");
 
   useEffect(() => {
     const id = crypto.randomUUID();
@@ -139,6 +141,8 @@ export default function AssessmentWizard() {
     switch (step) {
       case 1:
         return answers.industry !== "";
+      case 1.5:
+        return true; // email step always continuable (skip is safe)
       case 2:
         return answers.company_size !== "";
       case 3:
@@ -158,7 +162,11 @@ export default function AssessmentWizard() {
       return;
     }
     setStepError("");
-    setStep((s) => Math.min(s + 1, TOTAL_QUESTIONS));
+    setStep((s) => {
+      const target = Math.min(s + 1, TOTAL_QUESTIONS);
+      // Email step (1.5) renders only until the email is captured.
+      return target === 1.5 && emailCaptured ? target + 1 : target;
+    });
   };
 
   const back = () => {
@@ -206,6 +214,37 @@ export default function AssessmentWizard() {
       setStatus("error");
       track("assessment_failed", { sessionId });
     }
+  };
+
+  // Capture-at-start (growth Plan A stage 1): persist the email after Q1 so
+  // abandoners after this point remain reachable. Best-effort: a capture
+  // failure never blocks the wizard; the completion path re-persists email.
+  const handleEmailCapture = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailStepError("Please enter a valid email address.");
+      return;
+    }
+    setEmailStepError("");
+    setEmailStatus("submitting");
+    track("email_capture_submit", { sessionId });
+    try {
+      const res = await fetch("/api/assessment/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, email: trimmed }),
+      });
+      if (!res.ok) {
+        console.error("[assessment] start capture failed:", res.status);
+      }
+    } catch {
+      console.error("[assessment] start capture network error");
+    }
+    setEmailStatus("done");
+    setEmailCaptured(true);
+    track("email_captured_start", { sessionId });
+    setStep((s) => Math.min(s + 1, TOTAL_QUESTIONS));
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -271,9 +310,14 @@ export default function AssessmentWizard() {
             setAnswers={setAnswers}
             canContinue={canContinue}
             stepError={stepError}
+            email={email}
+            setEmail={setEmail}
+            emailStepError={emailStepError}
+            emailStatus={emailStatus}
             onNext={next}
             onBack={back}
             onSubmit={handleSubmit}
+            onEmailCapture={handleEmailCapture}
           />
         )}
 
@@ -320,23 +364,37 @@ function StepForm({
   setAnswers,
   canContinue,
   stepError,
+  email,
+  setEmail,
+  emailStepError,
+  emailStatus,
   onNext,
   onBack,
   onSubmit,
+  onEmailCapture,
 }: {
   step: number;
   answers: AssessmentAnswers;
   setAnswers: React.Dispatch<React.SetStateAction<AssessmentAnswers>>;
   canContinue: boolean;
   stepError: string;
+  email: string;
+  setEmail: React.Dispatch<React.SetStateAction<string>>;
+  emailStepError: string;
+  emailStatus: "idle" | "submitting" | "done";
   onNext: () => void;
   onBack: () => void;
   onSubmit: () => void;
+  onEmailCapture: (e: React.FormEvent) => void;
 }) {
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (step === 1.5) {
+          onEmailCapture(e);
+          return;
+        }
         if (step < TOTAL_QUESTIONS) onNext();
         else onSubmit();
       }}
@@ -347,7 +405,9 @@ function StepForm({
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">
-            Question {step} of {TOTAL_QUESTIONS}
+            {step === 1.5
+              ? "One quick step"
+              : `Question ${step} of ${TOTAL_QUESTIONS}`}
           </p>
           <p className="font-mono text-xs text-muted">
             {Math.round((step / TOTAL_QUESTIONS) * 100)}% complete
@@ -385,6 +445,43 @@ function StepForm({
               </option>
             ))}
           </select>
+        </QuestionField>
+      )}
+
+      {step === 1.5 && (
+        <QuestionField
+          title="Where should we send your report?"
+          subtitle="Your personalized report is generated at the end — enter your email now so it's waiting in your inbox. Free, no spam."
+        >
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.com"
+              autoFocus
+              className="w-full sm:flex-1 rounded-lg border border-hairline bg-canvas px-4 py-3.5 font-sans text-base text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={emailStatus === "submitting"}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3.5 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {emailStatus === "submitting" ? "Saving..." : "Continue →"}
+            </button>
+          </div>
+          {emailStepError && (
+            <p className="mt-4 text-sm text-accent" role="alert">
+              {emailStepError}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={onNext}
+            className="mt-4 font-sans text-sm text-muted hover:text-ink transition-colors"
+          >
+            Skip — just show my report
+          </button>
         </QuestionField>
       )}
 
@@ -472,7 +569,9 @@ function StepForm({
           <span />
         )}
 
-        {step < TOTAL_QUESTIONS ? (
+        {step === 1.5 ? (
+          <span />
+        ) : step < TOTAL_QUESTIONS ? (
           <button
             type="button"
             onClick={onNext}
