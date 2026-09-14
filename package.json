@@ -22,7 +22,7 @@
     "@keystatic/core": "0.6.8",
     "@supabase/supabase-js": "2.112.2",
     "@tailwindcss/vite": "^4",
-    "astro": "^7.2.9",
+    "astro": "^7.3.2",
     "gsap": "^3.15.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
