@@ -49,12 +49,43 @@ export const recommendationSchema = z.object({
   estimated_time_saved: z.string().min(1).max(40),
 });
 
+/* ------------------------------------------------------------------ */
+/* Paid report sections (Full AI Readiness Report)                     */
+/* ------------------------------------------------------------------ */
+
+export const roadmapPhaseSchema = z.object({
+  phase: z.string().min(1).max(40), // e.g. "Days 0-14"
+  focus: z.string().min(1).max(80),
+  actions: z.array(z.string().min(1).max(160)).min(2).max(5),
+});
+
+export const toolStackItemSchema = z.object({
+  category: z.string().min(1).max(40), // e.g. "Document processing"
+  recommendation: z.string().min(1).max(80),
+  est_monthly_cost: z.string().min(1).max(40), // e.g. "$20-$100/mo"
+});
+
+export const roiSchema = z.object({
+  setup_cost: z.string().min(1).max(40),
+  monthly_savings: z.string().min(1).max(40),
+  break_even: z.string().min(1).max(80),
+  first_year_net: z.string().min(1).max(80),
+});
+
+export const paidReportSchema = z.object({
+  summary: z.string().min(1).max(400),
+  roadmap: z.array(roadmapPhaseSchema).min(3).max(4),
+  tool_stack: z.array(toolStackItemSchema).min(3).max(6),
+  roi: roiSchema,
+});
+
 export const assessmentResultSchema = z.object({
   opportunity_score: z.number().min(0).max(100),
   estimated_savings: z.string().min(1).max(40),
   recommendations: z.array(recommendationSchema).min(3).max(5),
   next_steps: z.string().min(1).max(200),
   disclaimer: z.string().min(1).max(400),
+  report: paidReportSchema,
 });
 
 export const emailRequestSchema = z.object({
@@ -69,5 +100,24 @@ export const assessmentStartRequestSchema = z.object({
 
 export type AssessmentAnswers = z.infer<typeof answersSchema>;
 export type AssessmentResult = z.infer<typeof assessmentResultSchema>;
+export type PaidReport = z.infer<typeof paidReportSchema>;
 export type AssessmentRequest = z.infer<typeof assessmentRequestSchema>;
 export type EmailRequest = z.infer<typeof emailRequestSchema>;
+
+/* ------------------------------------------------------------------ */
+/* Paid product tiers                                                  */
+/* ------------------------------------------------------------------ */
+
+export const TIERS = {
+  report: {
+    label: "Full AI Readiness Report",
+    price: "$149",
+  },
+  session: {
+    label: "Report + Strategy Session",
+    price: "$499",
+  },
+} as const;
+
+export type Tier = keyof typeof TIERS;
+export const tierSchema = z.enum(["report", "session"]);

@@ -81,13 +81,17 @@ interface Recommendation {
   estimated_time_saved: string;
 }
 
+/** Free-tier projection returned by POST /api/assessment (see lib/assessment/report.ts). */
 interface AssessmentResult {
   opportunity_score: number;
   estimated_savings: string;
   recommendations: Recommendation[];
-  next_steps: string;
+  locked_count: number;
+  locked_sections: string[];
   disclaimer: string;
 }
+
+type Tier = "report" | "session";
 
 type Status = "form" | "submitting" | "results" | "error";
 
@@ -124,12 +128,13 @@ export default function AssessmentWizard() {
   const [stepError, setStepError] = useState<string>("");
   const [apiError, setApiError] = useState<string>("");
   const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
   const [emailStatus, setEmailStatus] = useState<"idle" | "submitting" | "done">(
     "idle"
   );
   const [emailCaptured, setEmailCaptured] = useState(false);
   const [emailStepError, setEmailStepError] = useState("");
+  const [checkoutPending, setCheckoutPending] = useState<Tier | null>(null);
+  const [checkoutError, setCheckoutError] = useState("");
 
   useEffect(() => {
     const id = crypto.randomUUID();
@@ -221,6 +226,36 @@ export default function AssessmentWizard() {
     }
   };
 
+  // Paid tier checkout: create a Stripe Checkout Session for this assessment
+  // and hand off to Stripe's hosted page. The full report renders on
+  // /report/[session_id] after verified payment.
+  const handleCheckout = async (tier: Tier) => {
+    setCheckoutError("");
+    setCheckoutPending(tier);
+    track("checkout_start", { sessionId, tier });
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, tier }),
+      });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setCheckoutError(
+          data.error ?? "Checkout is temporarily unavailable. Please try again."
+        );
+        setCheckoutPending(null);
+        track("checkout_failed", { sessionId, tier });
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setCheckoutError("Checkout is temporarily unavailable. Please try again.");
+      setCheckoutPending(null);
+      track("checkout_failed", { sessionId, tier });
+    }
+  };
+
   // Capture-at-start (growth Plan A stage 1): persist the email after Q1 so
   // abandoners after this point remain reachable. Best-effort: a capture
   // failure never blocks the wizard; the completion path re-persists email.
@@ -250,29 +285,6 @@ export default function AssessmentWizard() {
     setEmailCaptured(true);
     track("email_captured_start", { sessionId });
     setStep(2); // explicit: email step (1.5) always advances to question 2
-  };
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setEmailError("Please enter a valid email address.");
-      return;
-    }
-    setEmailError("");
-    setEmailStatus("submitting");
-    track("email_capture_submit", { sessionId });
-    try {
-      await fetch("/api/assessment/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sessionId, email: trimmed }),
-      });
-      setEmailStatus("done");
-    } catch {
-      setEmailStatus("idle");
-      setEmailError("Something went wrong. Please try again.");
-    }
   };
 
   return (
@@ -347,11 +359,9 @@ export default function AssessmentWizard() {
         {status === "results" && result && (
           <ResultsView
             result={result}
-            email={email}
-            setEmail={setEmail}
-            emailError={emailError}
-            emailStatus={emailStatus}
-            onEmailSubmit={handleEmailSubmit}
+            onCheckout={handleCheckout}
+            checkoutPending={checkoutPending}
+            checkoutError={checkoutError}
           />
         )}
       </div></div>
@@ -455,8 +465,8 @@ function StepForm({
 
       {step === 1.5 && (
         <QuestionField
-          title="Where should we send your report?"
-          subtitle="Your personalized report is generated at the end — enter your email now so it's waiting in your inbox. Free, no spam."
+          title="Where should we send your results?"
+          subtitle="Enter your email to save your assessment — we'll keep you posted on next steps. No spam."
         >
           <div className="flex flex-col sm:flex-row gap-3">
             <input
@@ -485,7 +495,7 @@ function StepForm({
             onClick={onNext}
             className="mt-4 font-sans text-sm text-muted hover:text-ink transition-colors"
           >
-            Skip — just show my report
+            Skip — just show my results
           </button>
         </QuestionField>
       )}
@@ -731,19 +741,19 @@ function AnalyzingState() {
 
 function ResultsView({
   result,
-  email,
-  setEmail,
-  emailError,
-  emailStatus,
-  onEmailSubmit,
+  onCheckout,
+  checkoutPending,
+  checkoutError,
 }: {
   result: AssessmentResult;
-  email: string;
-  setEmail: (value: string) => void;
-  emailError: string;
-  emailStatus: "idle" | "submitting" | "done";
-  onEmailSubmit: (e: React.FormEvent) => void;
+  onCheckout: (tier: Tier) => void;
+  checkoutPending: Tier | null;
+  checkoutError: string;
 }) {
+  useEffect(() => {
+    track("paywall_view");
+  }, []);
+  const teaser = result.recommendations[0];
   return (
     <div>
       {/* Big number */}
@@ -777,109 +787,127 @@ function ResultsView({
         </div>
       </div>
 
-      {/* Recommendations */}
-      <h2 className="font-serif text-2xl sm:text-3xl text-ink mb-6">
-        Your top automation opportunities
-      </h2>
-      <ol className="space-y-4 mb-8">
-        {result.recommendations.map((rec, i) => (
-          <li
-            key={rec.title}
-            className="rounded-lg border border-hairline bg-surface p-6"
-          >
-            <div className="flex items-start justify-between gap-4 mb-2">
-              <p className="font-serif text-lg text-ink">
-                <span className="font-mono text-muted mr-2">{i + 1}.</span>
-                {rec.title}
+      {/* Teaser: first recommendation, free */}
+      {teaser && (
+        <>
+          <div className="flex items-baseline justify-between mb-6">
+            <h2 className="font-serif text-2xl sm:text-3xl text-ink">
+              Your top automation opportunity
+            </h2>
+            <p className="font-mono text-xs text-muted shrink-0 ml-4">
+              1 of {result.recommendations.length + result.locked_count}
+            </p>
+          </div>
+          <ol className="space-y-4 mb-4">
+            <li
+              className="rounded-lg border border-hairline bg-surface p-6"
+            >
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <p className="font-serif text-lg text-ink">
+                  <span className="font-mono text-muted mr-2">1.</span>
+                  {teaser.title}
+                </p>
+                <span
+                  className={`shrink-0 rounded-full px-3 py-1 font-mono text-xs uppercase tracking-wider ${DIFFICULTY_STYLES[teaser.difficulty]}`}
+                >
+                  {teaser.difficulty}
+                </span>
+              </div>
+              <p className="text-sm text-body leading-relaxed mb-3">
+                {teaser.description}
               </p>
-              <span
-                className={`shrink-0 rounded-full px-3 py-1 font-mono text-xs uppercase tracking-wider ${DIFFICULTY_STYLES[rec.difficulty]}`}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted">
+                <span>{IMPACT_LABELS[teaser.impact]}</span>
+                <span aria-hidden="true">·</span>
+                <span>Saves {teaser.estimated_time_saved}</span>
+              </div>
+            </li>
+
+            {/* Locked opportunities — visible count, hidden content */}
+            {Array.from({ length: result.locked_count }).map((_, i) => (
+              <li
+                key={i}
+                className="rounded-lg border border-hairline bg-canvas p-6 flex items-center justify-between gap-4"
               >
-                {rec.difficulty}
-              </span>
-            </div>
-            <p className="text-sm text-body leading-relaxed mb-3">
-              {rec.description}
-            </p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted">
-              <span>{IMPACT_LABELS[rec.impact]}</span>
-              <span aria-hidden="true">·</span>
-              <span>Saves {rec.estimated_time_saved}</span>
-            </div>
-          </li>
-        ))}
-      </ol>
-
-      {/* Next steps */}
-      <div className="rounded-lg border border-hairline bg-surface p-6 mb-8">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-2">
-          Recommended next step
-        </p>
-        <p className="text-body leading-relaxed">{result.next_steps}</p>
-      </div>
-
-      {/* CTA */}
-      <div className="text-center mb-10">
-        <a href="/contact"
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-8 py-4 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover"
-        >
-          Book my strategy call to implement these →
-        </a>
-      </div>
-
-      {/* Email gate */}
-      {emailStatus === "done" ? (
-        <div className="rounded-lg border border-accent bg-surface p-8 text-center">
-          <p className="font-serif text-2xl text-ink mb-2">
-            Check your inbox!
-          </p>
-          <p className="text-sm text-muted">
-            Your full report is on its way.
-          </p>
-        </div>
-      ) : (
-        <div className="rounded-lg border border-hairline bg-surface p-8">
-          <p className="font-serif text-xl sm:text-2xl text-ink mb-2">
-            Enter your email to save your full report
-          </p>
-          <p className="text-sm text-muted mb-6">
-            Get personalized recommendations and a detailed breakdown — free,
-            no spam.
-          </p>
-          <form
-            onSubmit={onEmailSubmit}
-            className="flex flex-col sm:flex-row gap-3"
-            noValidate
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              className="flex-1 rounded-lg border border-hairline bg-canvas px-4 py-3 font-sans text-base text-ink placeholder:text-muted/60 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={emailStatus === "submitting"}
-              className="rounded-lg bg-accent px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              {emailStatus === "submitting" ? "Sending..." : "Send my report"}
-            </button>
-          </form>
-          {emailError && (
-            <p className="mt-3 text-sm text-accent" role="alert">
-              {emailError}
-            </p>
-          )}
-          <p className="mt-5 text-sm">
-            <a href="/contact"
-              className="text-muted underline-offset-4 hover:text-ink hover:underline"
-            >
-              No thanks, I&apos;ll book a call instead
-            </a>
-          </p>
-        </div>
+                <div className="space-y-2 min-w-0" aria-hidden="true">
+                  <div className="h-3 rounded bg-hairline w-3/4" />
+                  <div className="h-3 rounded bg-hairline w-1/2" />
+                </div>
+                <span className="shrink-0 rounded-full px-3 py-1 font-mono text-xs uppercase tracking-wider bg-hairline text-muted">
+                  🔒 In full report
+                </span>
+              </li>
+            ))}
+          </ol>
+        </>
       )}
+
+      {/* Paywall */}
+      <div className="rounded-lg border-2 border-accent bg-surface p-8 sm:p-10 mt-10">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-3">
+          Your full report is ready
+        </p>
+        <h2 className="font-serif text-2xl sm:text-3xl text-ink leading-tight mb-4">
+          Unlock your full AI Readiness Report
+        </h2>
+        <p className="text-sm text-muted mb-6">
+          We analyzed your answers against proven automation playbooks. Your
+          full report adds everything below — delivered instantly on screen
+          after payment.
+        </p>
+        <ul className="space-y-2.5 mb-8">
+          {result.locked_sections.map((section) => (
+            <li key={section} className="flex items-start gap-2.5">
+              <span className="font-mono text-accent text-sm shrink-0">✓</span>
+              <span className="text-sm text-body">{section}</span>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          type="button"
+          onClick={() => onCheckout("report")}
+          disabled={checkoutPending !== null}
+          data-cta="unlock-report"
+          className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {checkoutPending === "report"
+            ? "Opening secure checkout..."
+            : "Unlock my full report — $149 →"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onCheckout("session")}
+          disabled={checkoutPending !== null}
+          data-cta="unlock-session"
+          className="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-lg border border-accent px-8 py-4 font-sans text-sm font-medium text-accent transition-colors hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {checkoutPending === "session"
+            ? "Opening secure checkout..."
+            : "Add a 60-min strategy session — $499 →"}
+        </button>
+
+        {checkoutError && (
+          <p className="mt-4 text-sm text-accent text-center" role="alert">
+            {checkoutError}
+          </p>
+        )}
+
+        <p className="mt-6 text-center text-xs text-muted">
+          Secure payment via Stripe · 14-day refund guarantee ·{" "}
+          <a href="/refunds" className="underline underline-offset-4 hover:text-ink">
+            Refund policy
+          </a>
+        </p>
+      </div>
+
+      {/* Free-path CTA */}
+      <p className="mt-6 text-center text-sm">
+        <a href="/contact" className="text-muted underline-offset-4 hover:text-ink hover:underline">
+          Not ready to buy? Book a free strategy call instead
+        </a>
+      </p>
 
       {/* Disclaimer */}
       <p className="mt-8 text-xs text-muted leading-relaxed">

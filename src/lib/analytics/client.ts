@@ -18,6 +18,7 @@ export interface TrackOptions {
   page?: string;
   ctaId?: string;
   source?: string;
+  tier?: "report" | "session";
   utm?: {
     source?: string;
     medium?: string;
@@ -35,6 +36,7 @@ export function track(event: string, opts: TrackOptions = {}): void {
     if (opts.page) body.page = opts.page;
     if (opts.ctaId) body.cta_id = opts.ctaId;
     if (opts.source) body.source = opts.source;
+    if (opts.tier) body.tier = opts.tier;
     if (opts.utm) {
       if (opts.utm.source) body.utm_source = opts.utm.source;
       if (opts.utm.medium) body.utm_medium = opts.utm.medium;

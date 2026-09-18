@@ -25,6 +25,9 @@ export const PUBLIC_EVENT_NAMES = [
   "contact_start",
   "contact_submit",
   "lead_created",
+  "paywall_view",
+  "checkout_start",
+  "checkout_failed",
 ] as const;
 
 export type PublicEventName = (typeof PUBLIC_EVENT_NAMES)[number];
@@ -45,6 +48,7 @@ export const publicEventSchema = z
     page: z.string().max(512).optional(),
     cta_id: z.string().max(128).optional(),
     source: z.string().max(128).optional(),
+    tier: z.enum(["report", "session"]).optional(),
     utm_source: z.string().max(128).optional(),
     utm_medium: z.string().max(128).optional(),
     utm_campaign: z.string().max(128).optional(),
