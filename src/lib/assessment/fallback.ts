@@ -3,8 +3,10 @@ import {
   type AssessmentResult,
   challengeSchema,
   companySizeSchema,
+  paidReportSchema,
   recommendationSchema,
   timeSinkSchema,
+  toolStackItemSchema,
 } from "./schema";
 import type { z } from "zod";
 
@@ -65,6 +67,20 @@ export function normalizeModelOutput(raw: unknown): unknown {
     delete r.disclaimer;
     return r;
   });
+
+  // Hoist a flat report (model sometimes puts roadmap/tool_stack/roi at the
+  // top level instead of nesting under "report").
+  if (
+    !normalized.report &&
+    (normalized.roadmap || normalized.tool_stack || normalized.roi)
+  ) {
+    normalized.report = {
+      summary: normalized.summary ?? "",
+      roadmap: normalized.roadmap ?? [],
+      tool_stack: normalized.tool_stack ?? [],
+      roi: normalized.roi ?? {},
+    };
+  }
 
   return normalized;
 }
@@ -221,5 +237,147 @@ export function buildFallbackResult(answers: AssessmentAnswers): AssessmentResul
       "Book a free 30-minute strategy call and we'll map these opportunities to a concrete implementation plan with pricing.",
     disclaimer:
       "Estimates are based on typical outcomes for businesses of your size and are indicative only — not a guarantee. Results vary by implementation and workflow complexity.",
+    report: buildFallbackReport(answers, recs.slice(0, 5)),
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Deterministic paid report (fallback for the Full Readiness Report)  */
+/* ------------------------------------------------------------------ */
+
+const TOOL_BY_SINK: Record<
+  z.infer<typeof timeSinkSchema>,
+  z.infer<typeof toolStackItemSchema>
+> = {
+  data_entry: {
+    category: "Data extraction",
+    recommendation: "AI document/invoice extraction service",
+    est_monthly_cost: "$30-$150/mo",
+  },
+  customer_support: {
+    category: "Support automation",
+    recommendation: "AI assistant trained on your help content",
+    est_monthly_cost: "$50-$200/mo",
+  },
+  reporting: {
+    category: "Reporting automation",
+    recommendation: "Auto-compiled dashboard with AI summaries",
+    est_monthly_cost: "$20-$100/mo",
+  },
+  scheduling: {
+    category: "Scheduling",
+    recommendation: "AI booking and reminder assistant",
+    est_monthly_cost: "$10-$50/mo",
+  },
+  documents: {
+    category: "Document processing",
+    recommendation: "AI drafting and summarization workspace",
+    est_monthly_cost: "$20-$100/mo",
+  },
+  other: {
+    category: "Workflow automation",
+    recommendation: "Automation platform connecting your tools",
+    est_monthly_cost: "$30-$150/mo",
+  },
+};
+
+const INTEGRATION_TOOL: z.infer<typeof toolStackItemSchema> = {
+  category: "Integration layer",
+  recommendation: "Connector/glue platform between your systems",
+  est_monthly_cost: "$0-$75/mo",
+};
+
+const SETUP_COST_BY_SIZE: Record<z.infer<typeof companySizeSchema>, string> = {
+  "1-5": "$500-$1,500",
+  "6-20": "$1,000-$3,000",
+  "21-50": "$2,000-$6,000",
+  "51-200": "$4,000-$12,000",
+  "200+": "$8,000-$25,000",
+};
+
+function hoursMidpoint(range: string): number {
+  const m = range.match(/(\d+)\s*[-–]\s*(\d+)/);
+  if (m) return (Number(m[1]) + Number(m[2])) / 2;
+  const single = range.match(/(\d+)/);
+  return single ? Number(single[1]) : 4;
+}
+
+function kRounded(value: number): string {
+  const k = Math.round(value / 1000);
+  return `$${k}K`;
+}
+
+export function buildFallbackReport(
+  answers: AssessmentAnswers,
+  recs: z.infer<typeof recommendationSchema>[]
+): z.infer<typeof paidReportSchema> {
+  const totalHours = recs.reduce((sum, r) => sum + hoursMidpoint(r.estimated_time_saved), 0);
+  const LOADED_HOURLY = 35;
+  const WEEKS = 4.33;
+  const monthlyLow = Math.round(totalHours * LOADED_HOURLY * WEEKS * 0.75 / 100) * 100;
+  const monthlyHigh = Math.round(totalHours * LOADED_HOURLY * WEEKS * 1.15 / 100) * 100;
+
+  const setup = SETUP_COST_BY_SIZE[answers.company_size];
+  const [setupLowS, setupHighS] = setup.replace(/\$/g, "").split("-").map((s) => Number(s.replace(/,/g, "")));
+  const toolMid = recs.length * 75; // ~$75/mo midpoint per tool line
+  const firstYearLow = monthlyLow * 12 - setupHighS - toolMid * 12;
+  const firstYearHigh = monthlyHigh * 12 - setupLowS - toolMid * 12;
+
+  const breakEvenLow = Math.max(1, Math.round(setupLowS / monthlyHigh));
+  const breakEvenHigh = Math.max(breakEvenLow, Math.round(setupHighS / monthlyLow));
+
+  const seen = new Set<string>();
+  const toolStack = answers.time_sinks
+    .map((sink) => TOOL_BY_SINK[sink])
+    .filter((tool) => {
+      if (seen.has(tool.category)) return false;
+      seen.add(tool.category);
+      return true;
+    })
+    .slice(0, 5);
+  toolStack.push(INTEGRATION_TOOL);
+
+  const topRec = recs[0];
+  const secondRec = recs[1];
+  const thirdRec = recs[2];
+
+  return {
+    summary: `Your answers point to ${SAVINGS_BY_SIZE[answers.company_size]} in annual savings across ${recs.length} automatable opportunities. The 90-day roadmap below sequences the fastest, highest-impact win — ${topRec ? topRec.title.toLowerCase() : "your top process"} — first, then expands into the full stack.`,
+    roadmap: [
+      {
+        phase: "Days 0-14",
+        focus: "Pilot the highest-impact opportunity",
+        actions: [
+          topRec ? `Pilot: ${topRec.title} — trial an AI tool on two weeks of real workload` : "Pick one repetitive process and trial an AI tool on it for two weeks",
+          "Measure baseline hours and error rate before the pilot starts",
+          "Define success up front (e.g. 30% time saved) so the go/no-go call is objective",
+        ],
+      },
+      {
+        phase: "Days 15-45",
+        focus: "Expand to the next opportunities",
+        actions: [
+          secondRec ? `Roll out: ${secondRec.title.toLowerCase()}` : "Automate the second-highest-volume repetitive task",
+          thirdRec ? `Roll out: ${thirdRec.title.toLowerCase()}` : "Automate reporting on the pilots' savings so far",
+          "Document each automated workflow so a non-expert can operate it",
+        ],
+      },
+      {
+        phase: "Days 46-90",
+        focus: "Integrate, measure, and decide what's next",
+        actions: [
+          "Connect the pilots into one end-to-end automated flow",
+          `Compare measured savings against this report's projection (${kRounded(monthlyLow)}-${kRounded(monthlyHigh)}/mo)`,
+          "Pick the next process to automate from the remaining opportunities",
+        ],
+      },
+    ],
+    tool_stack: toolStack,
+    roi: {
+      setup_cost: setup,
+      monthly_savings: `$${monthlyLow.toLocaleString()}-$${monthlyHigh.toLocaleString()}/mo`,
+      break_even: `${breakEvenLow}-${breakEvenHigh} months`,
+      first_year_net: `${kRounded(firstYearLow)}-${kRounded(firstYearHigh)} net of setup and tools`,
+    },
   };
 }

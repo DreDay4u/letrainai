@@ -19,7 +19,8 @@ The response MUST be a single JSON object with EXACTLY these TOP-LEVEL fields:
   "estimated_savings": string like "$23K-$47K/year",
   "recommendations": array of 3-5 objects,
   "next_steps": string (max 200 chars),
-  "disclaimer": string (max 400 chars)
+  "disclaimer": string (max 400 chars),
+  "report": object — the full paid report (see below)
 }
 
 Each object in "recommendations" MUST have EXACTLY these fields:
@@ -30,6 +31,16 @@ Each object in "recommendations" MUST have EXACTLY these fields:
   "impact": "moderate" | "significant" | "transformative",
   "estimated_time_saved": string like "5-10 hours/week"
 }
+
+The "report" object MUST have EXACTLY these fields:
+{
+  "summary": string (max 400 chars) — an executive summary of their AI opportunity,
+  "roadmap": array of 3-4 objects, each { "phase": string like "Days 0-14", "focus": string (max 80 chars), "actions": array of 2-5 strings (max 160 chars each) },
+  "tool_stack": array of 3-6 objects, each { "category": string (max 40 chars), "recommendation": string (max 80 chars, generic tool category — no brand promises), "est_monthly_cost": string like "$20-$100/mo" },
+  "roi": { "setup_cost": string like "$500-$2,500", "monthly_savings": string like "$1,900-$3,900/mo", "break_even": string like "2-4 months", "first_year_net": string like "$18K-$41K net" }
+}
+
+Order the roadmap as a realistic 90-day implementation plan (pilot first, then expand, then integrate/measure). Ground ROI in the estimated hours saved across recommendations at a ~$35/hr loaded cost.
 
 IMPORTANT: "next_steps" and "disclaimer" go at the TOP LEVEL only — NEVER inside a recommendation object. Do not add any other fields anywhere. Respond with valid JSON only.`;
 
@@ -52,7 +63,7 @@ export async function callDeepSeek(answers: AssessmentAnswers): Promise<unknown>
       body: JSON.stringify({
         model: "deepseek-v4-flash",
         temperature: 0.3,
-        max_tokens: 1000,
+        max_tokens: 2200,
         thinking: { type: "disabled" },
         response_format: { type: "json_object" },
         messages: [

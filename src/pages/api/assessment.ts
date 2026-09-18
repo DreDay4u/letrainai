@@ -7,6 +7,7 @@ import {
   getCachedResult,
   getClientIp,
 } from "@/lib/assessment/generate";
+import { maskFreeResult } from "@/lib/assessment/report";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { trackEvent } from "@/lib/analytics";
 
@@ -71,8 +72,10 @@ export const POST: APIRoute = async ({ request }) => {
   const { session_id: sessionId, answers } = parsed.data;
 
   // Idempotency: return the cached result for a repeated session_id.
+  // The client only ever receives the FREE-tier projection — the full
+  // result (paid sections included) stays server-side in Supabase.
   const cached = getCachedResult(sessionId);
-  if (cached) return json(cached, 200);
+  if (cached) return json(maskFreeResult(cached), 200);
 
   const result = await generateResult(answers);
   cacheResult(sessionId, result);
@@ -111,7 +114,7 @@ export const POST: APIRoute = async ({ request }) => {
   // Best-effort analytics event.
   await trackEvent("assessment_complete", sessionId, null, null);
 
-  return json(result, 200);
+  return json(maskFreeResult(result), 200);
 };
 
 export const GET: APIRoute = () =>

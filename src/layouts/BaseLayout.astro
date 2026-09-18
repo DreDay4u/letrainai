@@ -7,9 +7,10 @@ interface Props {
   title: string;
   description?: string;
   canonical?: string;
+  noindex?: boolean;
 }
 
-const { title, description = 'AI consulting for businesses that take AI seriously. We build custom AI automation systems, AI-enhanced websites, and workflow optimization.', canonical } = Astro.props;
+const { title, description = 'AI consulting for businesses that take AI seriously. We build custom AI automation systems, AI-enhanced websites, and workflow optimization.', canonical, noindex = false } = Astro.props;
 const siteUrl = 'https://letrainai.com';
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href;
 ---
@@ -21,6 +22,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, siteUrl).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonicalUrl} />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href="/favicon.ico" />

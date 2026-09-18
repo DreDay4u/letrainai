@@ -127,6 +127,19 @@ const validPayload = {
       { title: "T2", description: "D2", difficulty: "high", impact: "significant", estimated_time_saved: "2h" },
       { title: "T3", description: "D3", difficulty: "medium", impact: "transformative", estimated_time_saved: "3h" },
     ],
+    // flat paid-report fields: normalizer must nest them under "report"
+    summary: "Exec summary",
+    roadmap: [
+      { phase: "Days 0-14", focus: "Pilot", actions: ["A1", "A2"] },
+      { phase: "Days 15-45", focus: "Expand", actions: ["B1", "B2"] },
+      { phase: "Days 46-90", focus: "Integrate", actions: ["C1", "C2"] },
+    ],
+    tool_stack: [
+      { category: "Data extraction", recommendation: "Extraction service", est_monthly_cost: "$30-$150/mo" },
+      { category: "Reporting", recommendation: "Dashboard", est_monthly_cost: "$20-$100/mo" },
+      { category: "Integration layer", recommendation: "Connectors", est_monthly_cost: "$0-$75/mo" },
+    ],
+    roi: { setup_cost: "$1,000", monthly_savings: "$2,000/mo", break_even: "1-2 months", first_year_net: "$20K net" },
   };
   const norm = fallback.normalizeModelOutput(nested);
   check("nested next_steps hoisted", norm.next_steps === "Do this");
@@ -135,6 +148,7 @@ const validPayload = {
     "nested fields stripped from recs",
     !("next_steps" in norm.recommendations[0] || "disclaimer" in norm.recommendations[0])
   );
+  check("flat report hoisted under report", Boolean(norm.report && norm.report.roadmap === nested.roadmap));
   const valid = schema.assessmentResultSchema.safeParse(norm);
   check("normalized output schema-valid", valid.success);
 }
