@@ -28,6 +28,10 @@ export const PUBLIC_EVENT_NAMES = [
   "paywall_view",
   "checkout_start",
   "checkout_failed",
+  "sample_report_view",
+  "pricing_view",
+  "report_link_copy",
+  "report_share",
 ] as const;
 
 export type PublicEventName = (typeof PUBLIC_EVENT_NAMES)[number];

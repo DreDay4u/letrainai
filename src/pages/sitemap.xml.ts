@@ -7,7 +7,7 @@ export const GET: APIRoute = async () => {
   const baseUrl = 'https://letrainai.com';
   const staticRoutes = [
     '/', '/services', '/about', '/assessment', '/process',
-    '/faq', '/contact', '/blog', '/case-studies',
+    '/faq', '/contact', '/blog', '/case-studies', '/pricing', '/sample-report',
   ];
   const posts = await getCollection('posts');
   const studies = await getCollection('caseStudies');

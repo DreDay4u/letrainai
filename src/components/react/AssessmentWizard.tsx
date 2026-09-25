@@ -359,6 +359,7 @@ export default function AssessmentWizard() {
         {status === "results" && result && (
           <ResultsView
             result={result}
+            sessionId={sessionId}
             onCheckout={handleCheckout}
             checkoutPending={checkoutPending}
             checkoutError={checkoutError}
@@ -465,8 +466,8 @@ function StepForm({
 
       {step === 1.5 && (
         <QuestionField
-          title="Where should we send your results?"
-          subtitle="Enter your email to save your assessment — we'll keep you posted on next steps. No spam."
+          title="Save your results — get next steps"
+          subtitle="Enter your email and we'll keep your assessment on file, then reach out with next steps when you're ready. No spam — and skipping changes nothing."
         >
           <div className="flex flex-col sm:flex-row gap-3">
             <input
@@ -722,6 +723,42 @@ function CheckboxGroup({
 /* Loading / results                                                   */
 /* ------------------------------------------------------------------ */
 
+function CopyLinkButton({ sessionId }: { sessionId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    const link = `${window.location.origin}/report/${sessionId}`;
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      // Clipboard API can be blocked (permissions / insecure context) —
+      // fall back to the legacy path so the action never silently fails.
+      const ta = document.createElement("textarea");
+      ta.value = link;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    setCopied(true);
+    track("report_link_copy", { sessionId });
+    window.setTimeout(() => setCopied(false), 2500);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      data-cta="copy-report-link"
+      className="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-accent px-5 py-2.5 font-sans text-sm font-medium text-accent transition-colors hover:bg-canvas"
+    >
+      {copied ? "Link copied ✓" : "Copy my results link"}
+    </button>
+  );
+}
+
 function AnalyzingState() {
   return (
     <div className="rounded-lg border border-hairline bg-surface p-12 text-center">
@@ -741,11 +778,13 @@ function AnalyzingState() {
 
 function ResultsView({
   result,
+  sessionId,
   onCheckout,
   checkoutPending,
   checkoutError,
 }: {
   result: AssessmentResult;
+  sessionId: string;
   onCheckout: (tier: Tier) => void;
   checkoutPending: Tier | null;
   checkoutError: string;
@@ -785,6 +824,15 @@ function ResultsView({
             />
           </div>
         </div>
+      </div>
+
+      {/* Saved-work anchor: the report URL is the canonical return link */}
+      <div className="rounded-lg border border-hairline bg-canvas p-5 mb-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+        <p className="text-sm text-muted leading-snug">
+          Your results are saved at a private link. Copy it now to come back
+          any time — even after closing this tab.
+        </p>
+        <CopyLinkButton sessionId={sessionId} />
       </div>
 
       {/* Teaser: first recommendation, free */}
@@ -855,7 +903,7 @@ function ResultsView({
           full report adds everything below — delivered instantly on screen
           after payment.
         </p>
-        <ul className="space-y-2.5 mb-8">
+        <ul className="space-y-2.5 mb-4">
           {result.locked_sections.map((section) => (
             <li key={section} className="flex items-start gap-2.5">
               <span className="font-mono text-accent text-sm shrink-0">✓</span>
@@ -863,6 +911,13 @@ function ResultsView({
             </li>
           ))}
         </ul>
+        <a
+          href="/sample-report"
+          data-cta="paywall-sample-link"
+          className="inline-block mb-8 font-sans text-sm text-accent underline underline-offset-4 hover:text-ink"
+        >
+          See a full sample report — exactly what you&apos;ll get →
+        </a>
 
         <button
           type="button"

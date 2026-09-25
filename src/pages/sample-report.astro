@@ -1,0 +1,95 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ReportBody from '../components/ReportBody.astro';
+import { buildFallbackResult } from '../lib/assessment/fallback';
+import type { AssessmentAnswers } from '../lib/assessment/schema';
+
+/**
+ * Sample AI Readiness Report — /sample-report
+ *
+ * Sales-transparency page: shows prospective buyers exactly what the $149
+ * full report contains before they pay. Rendered at BUILD time from the
+ * deterministic fallback engine with a fixed demo persona — zero database
+ * reads, zero live AI calls, no real user data anywhere on this page.
+ */
+
+const DEMO_ANSWERS: AssessmentAnswers = {
+  industry: 'Professional Services',
+  company_size: '21-50',
+  time_sinks: ['data_entry', 'reporting', 'documents'],
+  current_tools: ['email', 'spreadsheets', 'accounting'],
+  biggest_challenge: 'growth',
+};
+
+const result = buildFallbackResult(DEMO_ANSWERS);
+---
+
+<BaseLayout
+  title="Sample AI Readiness Report — See Exactly What You Get — LeTrainAI"
+  description="A complete example of the $149 Full AI Readiness Report: ranked automation opportunities, a 90-day roadmap, recommended tool stack, and ROI projection. Generated for a demo 21–50 person professional-services firm."
+>
+  <main class="bg-canvas text-body">
+    <script>
+      import { track } from '@/lib/analytics/client';
+      track('sample_report_view');
+    </script>
+
+    <article class="px-6 py-16 sm:py-24 pt-32 pb-24">
+      <div class="mx-auto w-full max-w-3xl">
+        <div class="border-b border-hairline pb-10 mb-10">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-6">
+            Sample report
+          </p>
+          <h1 class="font-serif text-4xl sm:text-5xl text-ink leading-[1.05]">
+            What a Full AI Readiness Report looks like
+          </h1>
+          <p class="mt-6 text-lg text-muted max-w-xl">
+            Everything below is a real, complete report — generated for a demo
+            21–50 person professional-services firm. Yours is built from your
+            answers in the free assessment.
+          </p>
+
+          <div class="mt-8 rounded-lg border-2 border-accent bg-surface p-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+            <p class="text-sm text-body leading-snug">
+              This whole report unlocks instantly after your free assessment.
+            </p>
+            <a
+              href="/assessment"
+              data-cta="sample-report-header-cta"
+              class="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+            >
+              Get my free assessment →
+            </a>
+          </div>
+
+          <div class="mt-8">
+            <div class="flex items-center justify-between mb-2">
+              <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Opportunity score</p>
+              <p class="font-mono text-sm text-accent font-medium">{result.opportunity_score}/100</p>
+            </div>
+            <div class="h-2 w-full rounded-full bg-hairline overflow-hidden">
+              <div class="h-full rounded-full bg-accent" style={`width: ${result.opportunity_score}%`}></div>
+            </div>
+          </div>
+        </div>
+
+        <ReportBody result={result} />
+
+        <div class="mt-10 text-center">
+          <a
+            href="/assessment"
+            data-cta="sample-report-footer-cta"
+            class="inline-flex items-center gap-2 rounded-lg bg-accent px-8 py-4 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+          >
+            Get my own free assessment →
+          </a>
+          <p class="mt-4 text-sm text-muted">
+            3 minutes · No technical knowledge required · See your top opportunity free
+          </p>
+        </div>
+      </div>
+    </article>
+  </main>
+</BaseLayout>

@@ -56,7 +56,7 @@ export const POST: APIRoute = async ({ request }) => {
         console.error("[assessment] Failed to persist email to Supabase:", error);
       } else {
         console.log(
-          `[assessment] email capture session=${sessionId} email=${email} rows_updated=${data?.length ?? 0}`
+          `[assessment] email capture session=${sessionId} rows_updated=${data?.length ?? 0}`
         );
       }
     } catch (err) {

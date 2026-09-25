@@ -1,0 +1,139 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+/**
+ * Pricing — /pricing
+ *
+ * Single page covering the full commercial ladder: free assessment →
+ * $149 full report → $499 report + strategy session → custom
+ * implementation (scoped per project, no invented price). Prices match
+ * the live Stripe TIERS in src/lib/assessment/schema.ts — never diverge.
+ */
+---
+
+<BaseLayout
+  title="Pricing — LeTrainAI"
+  description="Start free with the 3-minute AI assessment. Unlock the full AI Readiness Report for $149, add a 60-minute strategy session for $499, or scope a custom implementation. 14-day refund guarantee."
+>
+  <main class="bg-canvas text-body">
+    <script>
+      import { track } from '@/lib/analytics/client';
+      track('pricing_view');
+    </script>
+
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: "AI Readiness Report",
+      description: "A personalized report ranking your highest-ROI automation opportunities, with a 90-day roadmap, tool stack, and ROI projection.",
+      brand: { "@type": "Brand", name: "LeTrainAI" },
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Full AI Readiness Report",
+          price: "149.00",
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+          url: "https://letrainai.com/assessment",
+        },
+        {
+          "@type": "Offer",
+          name: "Full AI Readiness Report + Strategy Session",
+          price: "499.00",
+          priceCurrency: "USD",
+          availability: "https://schema.org/InStock",
+          url: "https://letrainai.com/assessment",
+        },
+      ],
+    })} />
+
+    <div class="px-6 py-16 sm:py-24 pt-32 pb-24">
+      <div class="mx-auto w-full max-w-5xl">
+        <div class="text-center mb-14">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-6">Pricing</p>
+          <h1 class="font-serif text-4xl sm:text-5xl text-ink leading-[1.05] max-w-2xl mx-auto">
+            Find your automation opportunity free. Unlock the plan for $149.
+          </h1>
+          <p class="mt-6 text-lg text-muted max-w-xl mx-auto">
+            Every path starts with the same free 3-minute assessment. Pay only
+            when you want the complete, personalized playbook.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Free -->
+          <div class="rounded-lg border border-hairline bg-surface p-8 flex flex-col">
+            <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-4">Start here</p>
+            <p class="font-serif text-4xl text-ink mb-1">Free</p>
+            <p class="text-sm text-muted mb-6">AI Assessment</p>
+            <ul class="space-y-2.5 text-sm text-body flex-1">
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Your AI opportunity score</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Estimated annual savings</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Your #1 automation opportunity in detail</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Results saved at a private link</span></li>
+            </ul>
+            <a href="/assessment" data-cta="pricing-free-cta" class="mt-8 inline-flex items-center justify-center gap-2 rounded-lg border border-accent px-6 py-3 font-sans text-sm font-medium text-accent transition-colors hover:bg-canvas">
+              Start the free assessment →
+            </a>
+          </div>
+
+          <!-- $149 — featured -->
+          <div class="rounded-lg border-2 border-accent bg-surface p-8 flex flex-col relative">
+            <span class="absolute -top-3 left-8 rounded-full bg-accent px-3 py-1 font-mono text-xs uppercase tracking-wider text-white">Most popular</span>
+            <p class="font-mono text-xs uppercase tracking-[0.2em] text-accent mb-4">Unlock everything</p>
+            <p class="font-serif text-4xl text-ink mb-1">$149</p>
+            <p class="text-sm text-muted mb-6">Full AI Readiness Report · one-time</p>
+            <ul class="space-y-2.5 text-sm text-body flex-1">
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>All ranked automation opportunities</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>90-day implementation roadmap</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Recommended tool stack with monthly costs</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>ROI projection with break-even point</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Delivered instantly · printable &amp; shareable</span></li>
+            </ul>
+            <a href="/assessment" data-cta="pricing-report-cta" class="mt-8 inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-sans text-sm font-medium text-white transition-colors hover:bg-accent-hover">
+              Get my free assessment →
+            </a>
+            <a href="/sample-report" data-cta="pricing-sample-link" class="mt-3 text-center font-sans text-sm text-accent underline underline-offset-4 hover:text-ink">
+              See a full sample report →
+            </a>
+          </div>
+
+          <!-- $499 -->
+          <div class="rounded-lg border border-hairline bg-surface p-8 flex flex-col">
+            <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-4">Add a human</p>
+            <p class="font-serif text-4xl text-ink mb-1">$499</p>
+            <p class="text-sm text-muted mb-6">Report + 60-min Strategy Session · one-time</p>
+            <ul class="space-y-2.5 text-sm text-body flex-1">
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Everything in the Full Report</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>60-minute session with a LeTrain AI consultant</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Your roadmap turned into an action plan</span></li>
+              <li class="flex items-start gap-2.5"><span class="font-mono text-accent shrink-0">✓</span><span>Direct answers for your stack and team</span></li>
+            </ul>
+            <a href="/assessment" data-cta="pricing-session-cta" class="mt-8 inline-flex items-center justify-center gap-2 rounded-lg border border-accent px-6 py-3 font-sans text-sm font-medium text-accent transition-colors hover:bg-canvas">
+              Start the free assessment →
+            </a>
+          </div>
+        </div>
+
+        <!-- Custom implementations -->
+        <div class="mt-6 rounded-lg border border-hairline bg-surface p-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+          <div>
+            <p class="font-serif text-xl text-ink mb-1">Custom AI implementation</p>
+            <p class="text-sm text-muted max-w-xl">We build and run the automations for you — scoped per project, priced against the ROI in your report. Most engagements pay for themselves within 60–90 days.</p>
+          </div>
+          <a href="/contact" data-cta="pricing-custom-cta" class="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg border border-accent px-6 py-3 font-sans text-sm font-medium text-accent transition-colors hover:bg-canvas">
+            Book a free strategy call →
+          </a>
+        </div>
+
+        <p class="mt-10 text-center text-sm text-muted">
+          One-time payments, secure checkout via Stripe ·
+          <a href="/refunds" class="underline underline-offset-4 hover:text-ink">14-day refund guarantee</a>
+          · Questions? <a href="/faq" class="underline underline-offset-4 hover:text-ink">Read the FAQ</a>
+        </p>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

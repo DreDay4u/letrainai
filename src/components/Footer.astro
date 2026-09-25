@@ -2,14 +2,15 @@
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t border-hairline bg-surface">
+<footer class="border-t border-hairline bg-surface print:hidden">
   <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
     <p class="text-sm text-muted-foreground">© {year} LeTrainAI. All rights reserved.</p>
-    <div class="flex items-center gap-6">
+    <div class="flex flex-wrap items-center justify-center gap-6">
       <a href="mailto:hello@letrainai.com" class="text-sm text-muted-foreground transition-colors hover:text-ink">hello@letrainai.com</a>
+      <a href="/pricing" class="text-sm text-muted-foreground transition-colors hover:text-ink">Pricing</a>
       <a href="/refunds" class="text-sm text-muted-foreground transition-colors hover:text-ink">Refunds</a>
-      <a href="https://linkedin.com" class="text-sm text-muted-foreground transition-colors hover:text-ink">LinkedIn</a>
-      <a href="https://x.com" class="text-sm text-muted-foreground transition-colors hover:text-ink">X</a>
+      <a href="/privacy" class="text-sm text-muted-foreground transition-colors hover:text-ink">Privacy</a>
+      <a href="/terms" class="text-sm text-muted-foreground transition-colors hover:text-ink">Terms</a>
     </div>
   </div>
 </footer>
