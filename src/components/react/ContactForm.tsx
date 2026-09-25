@@ -173,7 +173,7 @@ export default function ContactForm() {
                 <dt className="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-1">
                   Location
                 </dt>
-                <dd className="text-ink text-base">[City, State]</dd>
+                <dd className="text-ink text-base">Capitol Heights, MD</dd>
               </div>
               <div>
                 <dt className="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-1">

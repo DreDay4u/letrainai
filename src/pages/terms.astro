@@ -1,0 +1,61 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+/**
+ * Terms of service — /terms
+ *
+ * Plain-language terms matching the actual product behavior: one-time
+ * Stripe payments, on-screen report delivery, 14-day refund guarantee
+ * (see /refunds), indicative estimates. Flagged for legal review before
+ * final sign-off.
+ */
+---
+
+<BaseLayout
+  title="Terms of Service — LeTrainAI"
+  description="The plain-language terms for using LeTrainAI: what you get, how payments and refunds work, and what our reports are — and aren't."
+>
+  <main class="bg-canvas text-body">
+    <div class="px-6 py-16 sm:py-24 pt-32 pb-24">
+      <div class="mx-auto w-full max-w-2xl">
+        <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-4">Legal</p>
+        <h1 class="font-serif text-4xl sm:text-5xl text-ink leading-[1.05] mb-10">Terms of Service</h1>
+        <p class="text-sm text-muted mb-10">Last updated: September 25, 2026</p>
+
+        <div class="space-y-10 text-body leading-relaxed">
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">The service</h2>
+            <p>LeTrainAI provides a free AI readiness assessment, a paid Full AI Readiness Report ($149), and an optional 60-minute strategy session ($499 with the report). We also offer custom implementation services scoped separately.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Payments</h2>
+            <p>All payments are one-time, processed securely by Stripe. Prices are in US dollars. The Full Report is delivered on screen at a private link immediately after payment.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Refunds</h2>
+            <p>The paid report comes with a 14-day refund guarantee. If it isn't useful to you, tell us within 14 days of purchase and we'll refund it in full. Details are on the <a href="/refunds" class="text-accent underline underline-offset-4 hover:text-accent-hover">refund policy page</a>.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">What reports are — and aren't</h2>
+            <p>Your report is a planning tool. Savings figures, ROI projections, and timelines are estimates based on typical outcomes for businesses of your size — they are indicative, not guarantees. Actual results depend on your implementation and workflows.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Your use</h2>
+            <p>Your report is for use inside your business. Please don't resell or republish it. Don't share your report link publicly — anyone with the link can read your report.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Changes</h2>
+            <p>If we change these terms, the updated version will appear on this page with a new date. Questions? <a href="mailto:hello@letrainai.com" class="text-accent underline underline-offset-4 hover:text-accent-hover">hello@letrainai.com</a>.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

@@ -1,0 +1,67 @@
+---
+export const prerender = true;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+/**
+ * Privacy policy — /privacy
+ *
+ * Plain-language summary of what this site actually collects (assessment
+ * answers, optional email, contact-form details, non-PII analytics,
+ * Stripe-handled payments) and what it never does (no data selling, no
+ * tracking cookies, no third-party ad trackers). Flagged for legal review
+ * before final sign-off.
+ */
+---
+
+<BaseLayout
+  title="Privacy Policy — LeTrainAI"
+  description="What LeTrainAI collects, why, and what we never do: no data selling, no tracking cookies, no ad trackers. Request deletion any time."
+>
+  <main class="bg-canvas text-body">
+    <div class="px-6 py-16 sm:py-24 pt-32 pb-24">
+      <div class="mx-auto w-full max-w-2xl">
+        <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mb-4">Legal</p>
+        <h1 class="font-serif text-4xl sm:text-5xl text-ink leading-[1.05] mb-10">Privacy Policy</h1>
+        <p class="text-sm text-muted mb-10">Last updated: September 25, 2026</p>
+
+        <div class="space-y-10 text-body leading-relaxed">
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">What we collect</h2>
+            <ul class="space-y-3">
+              <li><strong>Assessment answers and your report.</strong> When you take the free AI assessment, we store your answers and the generated report so your results stay available at a private link.</li>
+              <li><strong>Email address (optional).</strong> Only if you choose to share it, so we can save your spot and follow up. You can complete the assessment without it.</li>
+              <li><strong>Contact details.</strong> If you use the contact form: name, email, phone (optional), and your message.</li>
+              <li><strong>Payment details — handled by Stripe.</strong> Card information goes directly to Stripe's secure checkout. We never see or store your card number.</li>
+              <li><strong>Anonymous usage events.</strong> Pages viewed and buttons clicked (e.g. "assessment started", "checkout began") with no name, email, or free-text attached.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">What we never do</h2>
+            <ul class="space-y-3">
+              <li>We don't sell, rent, or share your personal information with anyone.</li>
+              <li>We don't use tracking cookies, ad pixels, or third-party analytics trackers.</li>
+              <li>We don't send marketing email you didn't ask for.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Your report link</h2>
+            <p>Your report lives at a private, unguessable web address. Anyone who has that exact link can view it — treat it like a password. Don't post it publicly.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Data retention and deletion</h2>
+            <p>We keep your assessment, report, and contact details only as long as needed to serve you and follow up. Want everything deleted? Email <a href="mailto:hello@letrainai.com" class="text-accent underline underline-offset-4 hover:text-accent-hover">hello@letrainai.com</a> and we'll remove it — no questions asked.</p>
+          </section>
+
+          <section>
+            <h2 class="font-serif text-2xl text-ink mb-4">Questions</h2>
+            <p>Anything unclear? Write to <a href="mailto:hello@letrainai.com" class="text-accent underline underline-offset-4 hover:text-accent-hover">hello@letrainai.com</a>.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>

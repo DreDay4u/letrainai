@@ -18,8 +18,10 @@ const capabilities = [
     {/* Hero — left-biased, editorial */}
     <Section>
       <div class="flex flex-col gap-12 sm:flex-row sm:items-start">
-        {/* Photo placeholder */}
-        <div class="aspect-square w-full max-w-xs shrink-0 rounded-sm border border-hairline bg-surface"></div>
+        {/* Founder monogram — swap in a real portrait when one is available */}
+        <div class="aspect-square w-full max-w-xs shrink-0 rounded-sm border border-hairline bg-surface flex items-center justify-center">
+          <span class="font-serif text-7xl text-accent" aria-hidden="true">AL</span>
+        </div>
 
         {/* Name + value prop */}
         <div class="flex flex-col justify-center sm:pt-8">
@@ -84,7 +86,7 @@ const capabilities = [
         {/* Left: facts */}
         <div class="space-y-3">
           <p class="text-body">
-            Based in <span class="text-ink">[City, State]</span>
+            Based in <span class="text-ink">Capitol Heights, MD</span>
           </p>
           <p class="text-body">Available remotely across the US</p>
           <p class="text-body">

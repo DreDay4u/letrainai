@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ReportBody from '../../components/ReportBody.astro';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 import { maskFreeResult } from '../../lib/assessment/report';
+import { getSizeBenchmark, benchmarkVerdict, type CompanySize } from '../../lib/assessment/benchmark';
 
 /**
  * Full AI Readiness Report — /report/[session_id]
@@ -22,7 +23,7 @@ let row: Record<string, any> | null = null;
 if (isSupabaseConfigured && /^[A-Za-z0-9-]{8,64}$/.test(sessionId)) {
   const { data, error } = await supabase
     .from('assessment_results')
-    .select('session_id, status, payment_status, paid_tier, email, recommendation, paid_at')
+    .select('session_id, status, payment_status, paid_tier, email, recommendation, paid_at, responses')
     .eq('session_id', sessionId)
     .maybeSingle();
   if (error) console.error('[report] Supabase lookup failed:', error);
@@ -35,6 +36,17 @@ const result = paid ? (row!.recommendation ?? null) : null;
 const isSessionTier = paid && row!.paid_tier === 'session';
 const freeTeaser =
   found && !paid && row!.recommendation ? maskFreeResult(row!.recommendation) : null;
+
+const rawSize: unknown = row?.responses?.company_size;
+const bench =
+  typeof rawSize === 'string' && rawSize !== ''
+    ? { size: rawSize as CompanySize, ...getSizeBenchmark(rawSize as CompanySize) }
+    : null;
+const verdict = bench ? benchmarkVerdict((paid ? result : freeTeaser)?.opportunity_score ?? 0, bench.typicalScore) : null;
+const VERDICT_COPY: Record<string, string> = {
+  above: " — you're ahead of the curve",
+  below: ' — big upside waiting to be captured',
+};
 ---
 
 <BaseLayout
@@ -90,6 +102,11 @@ const freeTeaser =
                 {freeTeaser.estimated_savings}
                 <span class="block text-lg sm:text-xl text-body mt-2">in potential savings</span>
               </p>
+              {bench && (
+                <p class="mt-3 font-mono text-xs text-muted">
+                  Typical for {bench.size}-person teams: {bench.typicalScore}/100{VERDICT_COPY[verdict ?? 'average'] ?? ''}
+                </p>
+              )}
               <div class="mt-6 rounded-lg border border-hairline bg-canvas p-5">
                 <p class="font-serif text-lg text-ink mb-2">{freeTeaser.recommendations[0]?.title}</p>
                 <p class="text-sm text-body leading-relaxed mb-3">{freeTeaser.recommendations[0]?.description}</p>
@@ -158,10 +175,15 @@ const freeTeaser =
                 <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted">Opportunity score</p>
                 <p class="font-mono text-sm text-accent font-medium">{result.opportunity_score}/100</p>
               </div>
-              <div class="h-2 w-full rounded-full bg-hairline overflow-hidden">
-                <div class="h-full rounded-full bg-accent" style={`width: ${result.opportunity_score}%`}></div>
-              </div>
+            <div class="h-2 w-full rounded-full bg-hairline overflow-hidden">
+              <div class="h-full rounded-full bg-accent" style={`width: ${result.opportunity_score}%`}></div>
             </div>
+            {bench && (
+              <p class="mt-3 font-mono text-xs text-muted">
+                Typical for {bench.size}-person teams: {bench.typicalScore}/100{VERDICT_COPY[verdict ?? 'average'] ?? ''}
+              </p>
+            )}
+          </div>
             {isSessionTier && (
               <div class="mt-8 rounded-lg border border-accent bg-surface p-6">
                 <p class="font-serif text-lg text-ink mb-2">Your strategy session is included</p>

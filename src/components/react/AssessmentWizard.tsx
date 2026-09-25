@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { track } from "@/lib/analytics/client";
+import {
+  getSizeBenchmark,
+  benchmarkVerdict,
+  type CompanySize,
+} from "@/lib/assessment/benchmark";
 
 /* ------------------------------------------------------------------ */
 /* Question data                                                       */
@@ -360,6 +365,7 @@ export default function AssessmentWizard() {
           <ResultsView
             result={result}
             sessionId={sessionId}
+            answers={answers}
             onCheckout={handleCheckout}
             checkoutPending={checkoutPending}
             checkoutError={checkoutError}
@@ -779,12 +785,14 @@ function AnalyzingState() {
 function ResultsView({
   result,
   sessionId,
+  answers,
   onCheckout,
   checkoutPending,
   checkoutError,
 }: {
   result: AssessmentResult;
   sessionId: string;
+  answers: AssessmentAnswers;
   onCheckout: (tier: Tier) => void;
   checkoutPending: Tier | null;
   checkoutError: string;
@@ -793,6 +801,11 @@ function ResultsView({
     track("paywall_view");
   }, []);
   const teaser = result.recommendations[0];
+  const bench =
+    answers.company_size !== ""
+      ? getSizeBenchmark(answers.company_size as CompanySize)
+      : null;
+  const verdict = bench ? benchmarkVerdict(result.opportunity_score, bench.typicalScore) : null;
   return (
     <div>
       {/* Big number */}
@@ -823,6 +836,14 @@ function ResultsView({
               style={{ width: `${result.opportunity_score}%` }}
             />
           </div>
+          {bench && (
+            <p className="mt-3 font-mono text-xs text-muted">
+              Typical for {answers.company_size}-person teams:{" "}
+              {bench.typicalScore}/100
+              {verdict === "above" && " — you're ahead of the curve"}
+              {verdict === "below" && " — big upside waiting to be captured"}
+            </p>
+          )}
         </div>
       </div>
 
