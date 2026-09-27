@@ -16,6 +16,18 @@ if (!post) return Astro.redirect('/blog');
 
 const { Content } = await render(post);
 
+const articleLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.publishedAt.toISOString(),
+  author: { "@type": "Organization", name: "LeTrainAI", url: "https://letrainai.com" },
+  publisher: { "@type": "Organization", name: "LeTrainAI", url: "https://letrainai.com" },
+  mainEntityOfPage: "https://letrainai.com/blog/" + post.id,
+};
+
+
 function formatDate(date: Date) {
   return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
@@ -26,6 +38,7 @@ function isoDate(date: Date) {
 ---
 
 <BaseLayout title={post.data.title + ' — LeTrainAI'} description={post.data.description}>
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(articleLd)} />
   <main>
     <Section maxWidth="narrow">
       <a href="/blog" class="text-sm text-muted transition-colors hover:text-ink">

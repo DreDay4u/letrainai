@@ -37,6 +37,17 @@ const faqGroups = [
   title="FAQ — LeTrainAI"
   description="Common questions about AI consulting, implementation timelines, pricing, and what it's like to work with LeTrainAI."
 >
+  <script is:inline type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqGroups.flatMap((g) =>
+      g.items.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: { "@type": "Answer", text: item.a },
+      }))
+    ),
+  })} />
   <main>
     {/* Header */}
     <Section maxWidth="narrow" class="pb-8">
