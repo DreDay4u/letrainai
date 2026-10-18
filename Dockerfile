@@ -24,7 +24,9 @@ RUN apk add --no-cache curl \
     && npm ci --omit=dev \
     && npm cache clean --force
 COPY --from=builder --chown=node:node /app/dist ./dist
-# Keystatic local-mode storage: content collections live on disk (read + admin writes)
+# Keystatic local-mode storage: content on disk so the (production-blocked,
+# opt-in via KEYSTATIC_ADMIN_ENABLED=1) admin can read/write it. Collection
+# data itself is baked into dist at build time.
 COPY --from=builder --chown=node:node /app/src/content ./src/content
 USER node
 EXPOSE 3103

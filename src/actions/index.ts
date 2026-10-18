@@ -9,6 +9,7 @@ import {
   validateContactPayload,
 } from "@/lib/contact";
 import { trackEvent } from "@/lib/analytics";
+import { getClientIp } from "@/lib/client-ip";
 
 /**
  * Astro Actions — Phase 5.
@@ -27,11 +28,7 @@ export const server = {
     input: z.record(z.string(), z.unknown()),
     handler: async (rawInput, context) => {
       // Rate limit: 5 submissions per IP per hour (TRANSITIONAL in-memory).
-      const ip =
-        context.request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-        context.request.headers.get("x-real-ip") ??
-        "unknown";
-      if (isRateLimited(ip)) {
+      if (isRateLimited(getClientIp(context.request))) {
         throw new ActionError({
           code: "TOO_MANY_REQUESTS",
           message: CONTACT_RATE_LIMIT_MESSAGE,

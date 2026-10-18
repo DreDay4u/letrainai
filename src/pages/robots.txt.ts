@@ -6,6 +6,7 @@ export const GET: APIRoute = () => {
     'Allow: /',
     'Disallow: /api/',
     'Disallow: /keystatic/',
+    'Disallow: /report/', // per-buyer report artifacts — private, not content
     '',
     'Sitemap: https://letrainai.com/sitemap.xml',
   ];

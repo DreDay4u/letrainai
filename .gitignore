@@ -47,3 +47,4 @@ graphify-out/
 
 # documented env contract is committable
 !.env.example
+.worktrees/

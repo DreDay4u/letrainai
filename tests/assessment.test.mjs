@@ -167,7 +167,9 @@ const validPayload = {
   const r1 = generate.getClientIp(new Request("http://x/", { headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" } }));
   const r2 = generate.getClientIp(new Request("http://x/", { headers: { "x-real-ip": "9.9.9.9" } }));
   const r3 = generate.getClientIp(new Request("http://x/"));
-  check("x-forwarded-for first hop", r1 === "1.2.3.4", r1);
+  // LAST XFF entry (closest proxy): the first entry is client-spoofable
+  // and previously allowed rate-limit bypass by IP rotation.
+  check("x-forwarded-for last hop (anti-spoof)", r1 === "5.6.7.8", r1);
   check("x-real-ip fallback", r2 === "9.9.9.9", r2);
   check("unknown when no headers", r3 === "unknown", r3);
 }

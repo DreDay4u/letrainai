@@ -5,6 +5,9 @@ import {
   callDeepSeek,
 } from "./provider-deepseek";
 import { buildFallbackResult, normalizeModelOutput } from "./fallback";
+import { getClientIp } from "../client-ip";
+
+export { getClientIp };
 
 /**
  * Orchestration: validate -> provider -> normalize/validate -> fallback.
@@ -90,8 +93,3 @@ export function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-export function getClientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0]!.trim();
-  return request.headers.get("x-real-ip") ?? "unknown";
-}
