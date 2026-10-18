@@ -3,14 +3,14 @@
 // Desktop + motion allowed: CSS-sticky pinned stage, one SVG morphing through
 // 3 acts, scrubbed by GSAP (lazy chunk, loads only as section approaches).
 // Mobile / touch / reduced-motion / no-JS: readable static 3-panel sequence,
-// zero GSAP bytes. Copy mirrors existing homepage claims (15+ hrs).
+// zero GSAP bytes. Copy mirrors existing homepage claims (10 hrs, $20,000).
 import WorkflowDiagram from './WorkflowDiagram.astro';
 
 const acts = [
   {
     act: 'manual',
     title: 'Today: manual and disconnected',
-    body: 'Six tools that never talk. Your team re-enters the same data and burns 15+ hours a week.',
+    body: 'Six tools that never talk. Your team re-enters the same data — ten hours a week, one task alone.',
     state: 'manual' as const,
   },
   {
@@ -45,8 +45,8 @@ const acts = [
               {a.act === 'flow' && (
                 <div class="ws-stats">
                   <div class="ws-stat">
-                    <span class="ws-num" data-count="15" data-suffix="+">15+</span>
-                    <span class="ws-stat-label">hours reclaimed every week</span>
+                    <span class="ws-num" data-count="10">10</span>
+                    <span class="ws-stat-label">hours a week, one repetitive task</span>
                   </div>
                 </div>
               )}
@@ -69,8 +69,8 @@ const acts = [
           {a.act === 'flow' && (
             <div class="ws-stats ws-stats-static">
               <div class="ws-stat">
-                <span class="ws-num">15+</span>
-                <span class="ws-stat-label">hours reclaimed every week</span>
+                <span class="ws-num">10</span>
+                <span class="ws-stat-label">hours a week, one repetitive task</span>
               </div>
             </div>
           )}
